@@ -1,0 +1,26 @@
+{
+  "name": "iothub-webclient",
+  "version": "1.0.0",
+  "description": "Web application to connect to Azure IoT Hub from the browser",
+  "repository": "https://github.com/ridomin/iothub-webclient",
+  "scripts": {
+    "start": "node node_modules/serve/bin/serve.js ."
+  },
+  "keywords": [
+    "iot",
+    "mqtt"
+  ],
+  "author": "ridomin",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/paho-mqtt": "^1.0.4",
+    "serve": "^11.3.2",
+    "standard": "^14.3.4"
+  },
+  "standard": {
+    "globals": [
+      "Paho",
+      "Vue"
+    ]
+  }
+}
