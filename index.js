@@ -37,7 +37,7 @@ const createApp = () => {
       async connect () {
         if (this.saveConfig) {
           window.localStorage.setItem('connectionInfo',
-            JSON.stringify({ hubName: this.connectionInfo.hubName, deviceId: this.connectionInfo.deviceId, deviceKey: this.connectionInfo.deviceKey}))
+            JSON.stringify({ hubName: this.connectionInfo.hubName, deviceId: this.connectionInfo.deviceId, deviceKey: this.connectionInfo.deviceKey }))
         }
         const deviceId = this.connectionInfo.deviceId
         const host = `${this.connectionInfo.hubName}.azure-devices.net`
