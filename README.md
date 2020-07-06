@@ -17,3 +17,7 @@ Azure IoT Hub uses an HMAC signature to produce a SaS token used to authenticate
 Using MQTT the client can read **reported** and **desired** properties, but also **reported** properties can be updated.
 
 Desired properties updates and commands will be received in a web socket callback.
+
+## Help needed
+ 
+If you want to contribute, please send PRs.
