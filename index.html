@@ -35,6 +35,8 @@
             </p>
 
             <div class="right">
+                <label for="chkSaveConfig">Save Config</label>
+                <input type="checkbox" v-model="saveConfig">
                 <label for="btnConnect">{{connectionInfo.status}}</label>
                 <input type="button" id="btnConnect" value="Connect" @click="connect()">
             </div>
@@ -88,7 +90,7 @@
     <div class="footer">
         <i>
             Using <a href="https://github.com/eclipse/paho.mqtt.javascript">paho.mqtt.javascript</a> to communicate with Azure IoT hub. 
-            <a href="http://github.com/rido/iothub-webclient">source</a>
+            <a href="http://github.com/ridomin/iothub-webclient">source</a>
         </i>
     </div>
 </body>

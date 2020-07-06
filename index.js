@@ -8,10 +8,11 @@ const createApp = () => {
   const app = new Vue({
     el: '#app',
     data: {
+      saveConfig: true,
       connectionInfo: {
-        hubName: 'my-hub-name',
-        deviceId: 'my-device',
-        deviceKey: 'myprimaryorsecondaydevicekey=',
+        hubName: '',
+        deviceId: '',
+        deviceKey: '',
         modelId: 'dtmi:com:example:sampledevice;1',
         status: 'Disconnected',
         connected: false
@@ -24,8 +25,20 @@ const createApp = () => {
       sentMessages: 0,
       isTelemetryRunning: false
     },
+    created () {
+      const connInfo = JSON.parse(window.localStorage.getItem('connectionInfo') || '{}')
+      if (connInfo.hubName) {
+        this.connectionInfo.hubName = connInfo.hubName
+        this.connectionInfo.deviceId = connInfo.deviceId
+        this.connectionInfo.deviceKey = connInfo.deviceKey
+      }
+    },
     methods: {
       async connect () {
+        if (this.saveConfig) {
+          window.localStorage.setItem('connectionInfo',
+            JSON.stringify({ hubName: this.connectionInfo.hubName, deviceId: this.connectionInfo.deviceId, deviceKey: this.connectionInfo.deviceKey}))
+        }
         const deviceId = this.connectionInfo.deviceId
         const host = `${this.connectionInfo.hubName}.azure-devices.net`
         client = new HubClient(host, deviceId, this.connectionInfo.deviceKey, this.connectionInfo.modelId)
