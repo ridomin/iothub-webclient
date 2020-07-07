@@ -9,6 +9,7 @@ const createApp = () => {
     el: '#app',
     data: {
       saveConfig: true,
+      /** @type {ConnectionInfo} */
       connectionInfo: {
         hubName: '',
         deviceId: '',
@@ -26,22 +27,32 @@ const createApp = () => {
       isTelemetryRunning: false
     },
     created () {
+      /** @type { ConnectionInfo } connInfo */
       const connInfo = JSON.parse(window.localStorage.getItem('connectionInfo') || '{}')
       if (connInfo.hubName) {
         this.connectionInfo.hubName = connInfo.hubName
         this.connectionInfo.deviceId = connInfo.deviceId
         this.connectionInfo.deviceKey = connInfo.deviceKey
+        this.connectionInfo.modelId = connInfo.modelId
       }
     },
     methods: {
       async connect () {
         if (this.saveConfig) {
           window.localStorage.setItem('connectionInfo',
-            JSON.stringify({ hubName: this.connectionInfo.hubName, deviceId: this.connectionInfo.deviceId, deviceKey: this.connectionInfo.deviceKey }))
+            JSON.stringify(
+              { 
+                hubName: this.connectionInfo.hubName, 
+                deviceId: this.connectionInfo.deviceId, 
+                deviceKey: this.connectionInfo.deviceKey,
+                modelId: this.connectionInfo.modelId 
+              }))
         }
-        const deviceId = this.connectionInfo.deviceId
         const host = `${this.connectionInfo.hubName}.azure-devices.net`
-        client = new HubClient(host, deviceId, this.connectionInfo.deviceKey, this.connectionInfo.modelId)
+        client = new HubClient(host, 
+            this.connectionInfo.deviceId, 
+            this.connectionInfo.deviceKey, 
+            this.connectionInfo.modelId)
         client.setDirectMehodCallback((method, payload) => {
           this.commands.push({ method, payload })
         })
@@ -84,7 +95,7 @@ const createApp = () => {
       }
     },
     filters: {
-      pretty: function (value) {
+      pretty:function (value) {
         return JSON.stringify(JSON.parse(value), null, 2)
       }
     }
