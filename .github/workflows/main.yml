@@ -29,6 +29,11 @@ jobs:
     # install GitHub Pages
     - name: GitHub Pages
       uses: crazy-max/ghaction-github-pages@v2.1.0
+      with:
+        target_branch: gh-pages
+        build_dir: public
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 
     # Runs a set of commands using the runners shell
