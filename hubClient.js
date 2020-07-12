@@ -121,14 +121,16 @@ export class HubClient {
       })
     })
   }
-
+  /**
+   * @return {Promise<DeviceTwin>}
+   */
   getTwin () {
     return new Promise((resolve, reject) => {
       this.rid = Date.now()
       const readTwinMessage = new Paho.MQTT.Message('')
       readTwinMessage.destinationName = DEVICE_TWIN_GET_TOPIC + this.rid
       this._onReadTwinCompleted = (twin) => {
-        resolve(twin)
+        resolve(JSON.parse(twin))
       }
       this.client.send(readTwinMessage)
     })

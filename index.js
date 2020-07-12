@@ -66,10 +66,8 @@ const createApp = () => {
       },
       async readTwin () {
         const twin = await client.getTwin()
-        const msgObj = JSON.parse(twin)
-
-        this.reportedJson = JSON.stringify(msgObj.reported)
-        this.desiredJson = JSON.stringify(msgObj.desired)
+        this.reportedJson = JSON.stringify(twin.reported)
+        this.desiredJson = JSON.stringify(twin.desired)
       },
       async reportProp () {
         client.updateTwin(this.reportedPropJson)
