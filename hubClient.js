@@ -1,7 +1,7 @@
 const WEB_SOCKET = '/$iothub/websocket?iothub-no-client-cert=true'
 const DEVICE_TWIN_RES_TOPIC = '$iothub/twin/res/#'
 const DEVICE_TWIN_GET_TOPIC = '$iothub/twin/GET/?$rid='
-const DEVICE_TWIN_PUBLISH_TOPIC = '$iothub/twin/PATCH/properties/reported/?$rid=%d'
+const DEVICE_TWIN_PUBLISH_TOPIC = '$iothub/twin/PATCH/properties/reported/?$rid='
 const DIRECT_METHOD_TOPIC = '$iothub/methods/POST/#'
 const DEVICE_TWIN_DESIRED_PROP_RES_TOPIC = '$iothub/twin/PATCH/properties/desired/#'
 
@@ -51,7 +51,9 @@ export class HubClient {
     this.client = new Paho.MQTT.Client(this.host, Number(443), WEB_SOCKET, this.deviceId)
     this.c2dCallback = (method, payload) => {}
     this.desiredPropCallback = (desired) => {}
+    this.disconnectCallback = (err) => {}
     this._onReadTwinCompleted = (twin) => {}
+    this._onUpdateTwinCompleted = (updateResult) => {}
   }
 
   async connect () {
@@ -59,8 +61,11 @@ export class HubClient {
     if (this.modelId) userName += `&model-id=${this.modelId}`
     const password = await generateSasToken(`${this.host}/devices/${this.deviceId}`, this.key, null, 60)
     return new Promise((resolve, reject) => {
+
       this.client.onConnectionLost = (err) => {
+        console.log(err)
         this.connected = false
+        this.disconnectCallback(err)
         reject(err)
       }
 
@@ -70,8 +75,8 @@ export class HubClient {
       this.client.onMessageArrived = (/** @type {Paho.MQTT.Message} */ m) => {
         const destinationName = m.destinationName
         const payloadString = m.payloadString
-        // console.log('On Msg Arrived to ' + destinationName)
-        // console.log(payloadString)
+        console.log('On Msg Arrived to ' + destinationName)
+        console.log(payloadString)
         if (destinationName.indexOf('twin/res') > 0) {
           this._onReadTwinCompleted(payloadString)
         }
@@ -140,8 +145,9 @@ export class HubClient {
    * @param {string} reportedProperties
    */
   updateTwin (reportedProperties) {
+    this.rid = Date.now()
     const reportedTwinMessage = new Paho.MQTT.Message(reportedProperties)
-    reportedTwinMessage.destinationName = DEVICE_TWIN_PUBLISH_TOPIC
+    reportedTwinMessage.destinationName = DEVICE_TWIN_PUBLISH_TOPIC + this.rid
     this.client.send(reportedTwinMessage)
   }
 

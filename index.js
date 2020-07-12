@@ -59,19 +59,30 @@ const createApp = () => {
         client.setDesiredPropertyCallback((desired) => {
           this.desiredJson = desired
         })
+        client.disconnectCallback = (err) => {
+            this.connectionInfo.connected = false
+            this.connectionInfo.status = "Disconnected"
+        }
         await client.connect()
         this.connectionInfo.status = 'Connected'
         this.connectionInfo.connected = true
         await this.readTwin()
       },
       async readTwin () {
-        const twin = await client.getTwin()
-        this.reportedJson = JSON.stringify(twin.reported)
-        this.desiredJson = JSON.stringify(twin.desired)
+        if (client.connected) 
+        {
+          const twin = await client.getTwin()
+          this.reportedJson = JSON.stringify(twin.reported)
+          this.desiredJson = JSON.stringify(twin.desired)
+        } else {
+          console.log('not connected')
+        }
+
       },
       async reportProp () {
-        client.updateTwin(this.reportedPropJson)
-        await this.readTwin()
+        const payload = this.reportedPropJson
+        console.log(payload)
+        client.updateTwin(payload)
       },
       startTelemetry () {
         telemetryInterval = setInterval(() => {
