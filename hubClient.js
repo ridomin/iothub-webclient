@@ -51,7 +51,7 @@ export class HubClient {
     this.client = new Paho.MQTT.Client(this.host, Number(443), WEB_SOCKET, this.deviceId)
     this.c2dCallback = (method, payload) => {}
     this.desiredPropCallback = (desired) => {}
-    this.disconnectCallback = (err) => {}
+    this.disconnectCallback = (err) => { console.log(err) }
     this._onReadTwinCompleted = (twin) => {}
     this._onUpdateTwinCompleted = (updateResult) => {}
   }
@@ -61,7 +61,6 @@ export class HubClient {
     if (this.modelId) userName += `&model-id=${this.modelId}`
     const password = await generateSasToken(`${this.host}/devices/${this.deviceId}`, this.key, null, 60)
     return new Promise((resolve, reject) => {
-
       this.client.onConnectionLost = (err) => {
         console.log(err)
         this.connected = false
@@ -126,6 +125,7 @@ export class HubClient {
       })
     })
   }
+
   /**
    * @return {Promise<DeviceTwin>}
    */

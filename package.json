@@ -21,6 +21,9 @@
     "globals": [
       "Paho",
       "Vue"
+    ],
+    "ignore": [
+      "lib/**"
     ]
   }
 }
