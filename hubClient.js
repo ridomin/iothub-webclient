@@ -53,7 +53,7 @@ export class HubClient {
     this.desiredPropCallback = (desired) => {}
     this.disconnectCallback = (err) => { console.log(err) }
     this._onReadTwinCompleted = (twin) => {}
-    this._onUpdateTwinCompleted = (updateResult) => {}
+    this._onUpdateTwinCompleted = () => {}
   }
 
   async connect () {
@@ -76,8 +76,11 @@ export class HubClient {
         const payloadString = m.payloadString
         console.log('On Msg Arrived to ' + destinationName)
         console.log(payloadString)
-        if (destinationName.indexOf('twin/res') > 0) {
+        if (destinationName === '$iothub/twin/res/200/?$rid=' + this.rid) {
           this._onReadTwinCompleted(payloadString)
+        }
+        if (destinationName.startsWith('$iothub/twin/res/204/?$rid=' + this.rid)) {
+          this._onUpdateTwinCompleted()
         }
         if (destinationName.indexOf('methods/POST') > 1) {
           const methodName = destinationName.split('/')[3]
@@ -130,14 +133,15 @@ export class HubClient {
    * @return {Promise<DeviceTwin>}
    */
   getTwin () {
+    this.rid = Date.now()
+    console.log(this.rid)
+    const readTwinMessage = new Paho.MQTT.Message('')
+    readTwinMessage.destinationName = DEVICE_TWIN_GET_TOPIC + this.rid
+    this.client.send(readTwinMessage)
     return new Promise((resolve, reject) => {
-      this.rid = Date.now()
-      const readTwinMessage = new Paho.MQTT.Message('')
-      readTwinMessage.destinationName = DEVICE_TWIN_GET_TOPIC + this.rid
       this._onReadTwinCompleted = (twin) => {
         resolve(JSON.parse(twin))
       }
-      this.client.send(readTwinMessage)
     })
   }
 
@@ -146,9 +150,15 @@ export class HubClient {
    */
   updateTwin (reportedProperties) {
     this.rid = Date.now()
+    console.log(this.rid)
     const reportedTwinMessage = new Paho.MQTT.Message(reportedProperties)
     reportedTwinMessage.destinationName = DEVICE_TWIN_PUBLISH_TOPIC + this.rid
     this.client.send(reportedTwinMessage)
+    return new Promise((resolve, reject) => {
+      this._onUpdateTwinCompleted = () => {
+        resolve(204)
+      }
+    })
   }
 
   /**
