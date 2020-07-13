@@ -49,13 +49,27 @@ export class HubClient {
     this.modelId = modelId
     this.rid = 0
     this.client = new Paho.MQTT.Client(this.host, Number(443), WEB_SOCKET, this.deviceId)
+
+    /**
+     * @description Callback when a commnand invocation is received
+     * @param {string} method
+     * @param {string} payload
+     */
     this.c2dCallback = (method, payload) => {}
+
+    /**
+     * @description Callback for desired properties upadtes
+     * @param {string} desired
+     */
     this.desiredPropCallback = (desired) => {}
     this.disconnectCallback = (err) => { console.log(err) }
     this._onReadTwinCompleted = (twin) => {}
     this._onUpdateTwinCompleted = () => {}
   }
 
+  /**
+   * @description Connects to Azure IoT Hub using MQTT over websockets
+   */
   async connect () {
     let userName = `${this.host}/${this.deviceId}/?api-version=2020-05-31-preview`
     if (this.modelId) userName += `&model-id=${this.modelId}`

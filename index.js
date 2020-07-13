@@ -67,7 +67,7 @@ const createApp = () => {
         await client.connect()
         this.connectionInfo.status = 'Connected'
         this.connectionInfo.connected = true
-        // await this.readTwin()
+        await this.readTwin()
       },
       async readTwin () {
         if (client.connected) {
@@ -80,9 +80,10 @@ const createApp = () => {
       },
       async reportProp () {
         const payload = this.reportedPropJson
-        console.log(payload)
         const updateResult = await client.updateTwin(payload)
-        console.log(updateResult)
+        if (updateResult === 204) {
+          await this.readTwin()
+        }
       },
       startTelemetry () {
         telemetryInterval = setInterval(() => {
