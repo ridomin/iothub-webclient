@@ -41,39 +41,49 @@ const createApp = () => {
         if (this.saveConfig) {
           window.localStorage.setItem('connectionInfo',
             JSON.stringify(
-              { 
-                hubName: this.connectionInfo.hubName, 
-                deviceId: this.connectionInfo.deviceId, 
+              {
+                hubName: this.connectionInfo.hubName,
+                deviceId: this.connectionInfo.deviceId,
                 deviceKey: this.connectionInfo.deviceKey,
-                modelId: this.connectionInfo.modelId 
+                modelId: this.connectionInfo.modelId
               }))
         }
         const host = `${this.connectionInfo.hubName}.azure-devices.net`
-        client = new HubClient(host, 
-            this.connectionInfo.deviceId, 
-            this.connectionInfo.deviceKey, 
-            this.connectionInfo.modelId)
+        client = new HubClient(host,
+          this.connectionInfo.deviceId,
+          this.connectionInfo.deviceKey,
+          this.connectionInfo.modelId)
         client.setDirectMehodCallback((method, payload) => {
           this.commands.push({ method, payload })
         })
         client.setDesiredPropertyCallback((desired) => {
           this.desiredJson = desired
         })
+        client.disconnectCallback = (err) => {
+          console.log(err)
+          this.connectionInfo.connected = false
+          this.connectionInfo.status = 'Disconnected'
+        }
         await client.connect()
         this.connectionInfo.status = 'Connected'
         this.connectionInfo.connected = true
         await this.readTwin()
       },
       async readTwin () {
-        const twin = await client.getTwin()
-        const msgObj = JSON.parse(twin)
-
-        this.reportedJson = JSON.stringify(msgObj.reported)
-        this.desiredJson = JSON.stringify(msgObj.desired)
+        if (client.connected) {
+          const twin = await client.getTwin()
+          this.reportedJson = JSON.stringify(twin.reported)
+          this.desiredJson = JSON.stringify(twin.desired)
+        } else {
+          console.log('not connected')
+        }
       },
       async reportProp () {
-        client.updateTwin(this.reportedPropJson)
-        await this.readTwin()
+        const payload = this.reportedPropJson
+        const updateResult = await client.updateTwin(payload)
+        if (updateResult === 204) {
+          await this.readTwin()
+        }
       },
       startTelemetry () {
         telemetryInterval = setInterval(() => {
@@ -95,7 +105,7 @@ const createApp = () => {
       }
     },
     filters: {
-      pretty:function (value) {
+      pretty: function (value) {
         return JSON.stringify(JSON.parse(value), null, 2)
       }
     }

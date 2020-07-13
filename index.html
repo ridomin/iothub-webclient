@@ -7,7 +7,7 @@
     <title>Azure IoT Hub Web Client</title>
     <!-- This is a development version of Vue.js! -->
     <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
-    <script src="paho-mqtt-min.js"></script>
+    <script src="lib/paho-mqtt.js"></script>
     <link rel="stylesheet" href="s.css">
 </head>
 
@@ -27,11 +27,11 @@
             </p>
             <p>
                 <label for="inputDeviceKey">DeviceKey</label>
-                <input type="text" id="inputDeviceKey" size="60" v-model='connectionInfo.deviceKey'>
+                <input type="text" id="inputDeviceKey" size="45" v-model='connectionInfo.deviceKey'>
             </p>
             <p>
                 <label for="inputModelId">Model Id</label>
-                <input type="text" id="inputModelId" size="60" v-model='connectionInfo.modelId'>
+                <input type="text" id="inputModelId" size="45" v-model='connectionInfo.modelId'>
             </p>
 
             <div class="right">
