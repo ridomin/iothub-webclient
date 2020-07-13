@@ -4,7 +4,8 @@
   "description": "Web application to connect to Azure IoT Hub from the browser",
   "repository": "https://github.com/ridomin/iothub-webclient",
   "scripts": {
-    "start": "node node_modules/serve/bin/serve.js ."
+    "start": "node node_modules/serve/bin/serve.js .",
+    "build": "standard && node node_modules/terser/bin/terser --compress --mangle --output lib/hubClient-min.js -- hubClient.js"
   },
   "keywords": [
     "iot",
@@ -15,7 +16,8 @@
   "devDependencies": {
     "@types/paho-mqtt": "^1.0.4",
     "serve": "^11.3.2",
-    "standard": "^14.3.4"
+    "standard": "^14.3.4",
+    "terser": "^4.8.0"
   },
   "standard": {
     "globals": [
