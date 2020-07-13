@@ -2,6 +2,8 @@
 
 Web application to connect to Azure IoT Hub from the browser
 
+Live in [mqtt.rido.dev/](https://mqtt.rido.dev/)
+
 ## MQTT in the browser
 
 Azure IoT Hub support MQTT over web sockets enabling bi-directional communication.
