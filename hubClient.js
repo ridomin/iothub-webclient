@@ -1,7 +1,7 @@
 const WEB_SOCKET = '/$iothub/websocket?iothub-no-client-cert=true'
 const DEVICE_TWIN_RES_TOPIC = '$iothub/twin/res/#'
 const DEVICE_TWIN_GET_TOPIC = '$iothub/twin/GET/?$rid='
-const DEVICE_TWIN_PUBLISH_TOPIC = '$iothub/twin/PATCH/properties/reported/?$rid=%d'
+const DEVICE_TWIN_PUBLISH_TOPIC = '$iothub/twin/PATCH/properties/reported/?$rid='
 const DIRECT_METHOD_TOPIC = '$iothub/methods/POST/#'
 const DEVICE_TWIN_DESIRED_PROP_RES_TOPIC = '$iothub/twin/PATCH/properties/desired/#'
 
@@ -49,18 +49,36 @@ export class HubClient {
     this.modelId = modelId
     this.rid = 0
     this.client = new Paho.MQTT.Client(this.host, Number(443), WEB_SOCKET, this.deviceId)
+
+    /**
+     * @description Callback when a commnand invocation is received
+     * @param {string} method
+     * @param {string} payload
+     */
     this.c2dCallback = (method, payload) => {}
+
+    /**
+     * @description Callback for desired properties upadtes
+     * @param {string} desired
+     */
     this.desiredPropCallback = (desired) => {}
+    this.disconnectCallback = (err) => { console.log(err) }
     this._onReadTwinCompleted = (twin) => {}
+    this._onUpdateTwinCompleted = () => {}
   }
 
+  /**
+   * @description Connects to Azure IoT Hub using MQTT over websockets
+   */
   async connect () {
     let userName = `${this.host}/${this.deviceId}/?api-version=2020-05-31-preview`
     if (this.modelId) userName += `&model-id=${this.modelId}`
     const password = await generateSasToken(`${this.host}/devices/${this.deviceId}`, this.key, null, 60)
     return new Promise((resolve, reject) => {
       this.client.onConnectionLost = (err) => {
+        console.log(err)
         this.connected = false
+        this.disconnectCallback(err)
         reject(err)
       }
 
@@ -70,10 +88,13 @@ export class HubClient {
       this.client.onMessageArrived = (/** @type {Paho.MQTT.Message} */ m) => {
         const destinationName = m.destinationName
         const payloadString = m.payloadString
-        // console.log('On Msg Arrived to ' + destinationName)
-        // console.log(payloadString)
-        if (destinationName.indexOf('twin/res') > 0) {
+        console.log('On Msg Arrived to ' + destinationName)
+        console.log(payloadString)
+        if (destinationName === '$iothub/twin/res/200/?$rid=' + this.rid) {
           this._onReadTwinCompleted(payloadString)
+        }
+        if (destinationName.startsWith('$iothub/twin/res/204/?$rid=' + this.rid)) {
+          this._onUpdateTwinCompleted()
         }
         if (destinationName.indexOf('methods/POST') > 1) {
           const methodName = destinationName.split('/')[3]
@@ -122,15 +143,19 @@ export class HubClient {
     })
   }
 
+  /**
+   * @return {Promise<DeviceTwin>}
+   */
   getTwin () {
+    this.rid = Date.now()
+    console.log(this.rid)
+    const readTwinMessage = new Paho.MQTT.Message('')
+    readTwinMessage.destinationName = DEVICE_TWIN_GET_TOPIC + this.rid
+    this.client.send(readTwinMessage)
     return new Promise((resolve, reject) => {
-      this.rid = Date.now()
-      const readTwinMessage = new Paho.MQTT.Message('')
-      readTwinMessage.destinationName = DEVICE_TWIN_GET_TOPIC + this.rid
       this._onReadTwinCompleted = (twin) => {
-        resolve(twin)
+        resolve(JSON.parse(twin))
       }
-      this.client.send(readTwinMessage)
     })
   }
 
@@ -138,9 +163,16 @@ export class HubClient {
    * @param {string} reportedProperties
    */
   updateTwin (reportedProperties) {
+    this.rid = Date.now()
+    console.log(this.rid)
     const reportedTwinMessage = new Paho.MQTT.Message(reportedProperties)
-    reportedTwinMessage.destinationName = DEVICE_TWIN_PUBLISH_TOPIC
+    reportedTwinMessage.destinationName = DEVICE_TWIN_PUBLISH_TOPIC + this.rid
     this.client.send(reportedTwinMessage)
+    return new Promise((resolve, reject) => {
+      this._onUpdateTwinCompleted = () => {
+        resolve(204)
+      }
+    })
   }
 
   /**

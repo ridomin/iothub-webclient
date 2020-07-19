@@ -6,3 +6,8 @@ type ConnectionInfo = {
     status: string,
     connected: bool
 }
+
+type DeviceTwin = {
+    reported: any,
+    desired: any
+}
