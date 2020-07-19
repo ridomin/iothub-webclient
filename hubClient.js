@@ -4,7 +4,7 @@ const DEVICE_TWIN_GET_TOPIC = '$iothub/twin/GET/?$rid='
 const DEVICE_TWIN_PUBLISH_TOPIC = '$iothub/twin/PATCH/properties/reported/?$rid='
 const DIRECT_METHOD_TOPIC = '$iothub/methods/POST/#'
 const DEVICE_TWIN_DESIRED_PROP_RES_TOPIC = '$iothub/twin/PATCH/properties/desired/#'
-
+const DIRECT_METHOD_RESPONSE_TOPiC = '$iothub/methods/res/{status}/?$rid='
 /**
  *
  * @param {String} key
@@ -189,6 +189,11 @@ export class HubClient {
    */
   setDirectMehodCallback (c2dCallback) {
     this.c2dCallback = c2dCallback
+  }
+
+  commandResponse (methodName) {
+    const response = new Paho.MQTT.Message('')
+    this.client.send(response)
   }
 
   /**

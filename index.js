@@ -18,7 +18,17 @@ const createApp = () => {
         status: 'Disconnected',
         connected: false
       },
-      commands: [],
+      commands: [
+        {
+          method: 'MyCommand',
+          payload: JSON.stringify({
+            myCommandPayload: {
+              param1: 'value1',
+              param2: 'value2'
+            }
+          }, null, 2)
+        }
+      ],
       reportedJson: '{}',
       desiredJson: '{}',
       reportedPropJson: '{ newProperty: "new value" }',
@@ -84,6 +94,9 @@ const createApp = () => {
         if (updateResult === 204) {
           await this.readTwin()
         }
+      },
+      cmdResponse (method) {
+        client.commandResponse()    
       },
       startTelemetry () {
         telemetryInterval = setInterval(() => {

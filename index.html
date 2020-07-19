@@ -79,8 +79,9 @@
             <div>
                 <h4>Commands</h4>
                 <ul v-for="c in commands">
-                    <li>{{ c.method }}</li>
-                    <li>{{ c.payload }}</li>
+                    <strong>{{ c.method }}</strong>
+                    <pre>{{ c.payload }}</pre>
+                    <button @click="cmdResponse(c.method)">Response OK</button>
                 </ul>
             </div>
             
