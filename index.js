@@ -95,9 +95,9 @@ const createApp = () => {
           await this.readTwin()
         }
       },
-      cmdResponse (method, rid) {
+      cmdResponse (method, rid, status) {
         console.log('sending response ' + method + rid)
-        client.commandResponse(method, rid)
+        client.commandResponse(method, rid, status)
       },
       clearCommands () {
         this.commands = []

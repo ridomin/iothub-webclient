@@ -17,14 +17,15 @@ const client = new HubClient(host,
   this.connectionInfo.modelId)
 
 client.setDirectMehodCallback((method, payload) => {
-        this.commands.push({ method, payload })
-      })
+    // execute command
+})
         
-        client.setDesiredPropertyCallback((desired) => {
-          this.desiredJson = desired
-        })
+client.setDesiredPropertyCallback((desired) => {
+  // desired property received
+})
 
 await client.connect()
+await client.updateTwin('{}')
 ```
 
 

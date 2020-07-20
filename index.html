@@ -82,7 +82,8 @@
                 <ul v-for="c in commands">
                     <strong>{{ c.method }}</strong> {{ c.rid }}
                     <pre>{{ c.payload }}</pre>
-                    <button @click="cmdResponse(c.method, c.rid)">Response OK</button>
+                    <button @click="cmdResponse(c.method, c.rid, 200)">Response OK</button>
+                    <button @click="cmdResponse(c.method, c.rid, 500)">Failed</button>
                 </ul>
             </div>
             

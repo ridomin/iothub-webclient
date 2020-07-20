@@ -101,7 +101,7 @@ export class HubClient {
           const destParts = destinationName.split('/') // $iothub/methods/POST/myCommand/?$rid=2
           const methodName = destParts[3]
           const ridPart = destParts[4]
-          const rid = ridPart.split('=')[1]
+          const rid = parseInt(ridPart.split('=')[1])
           this.c2dCallback(methodName, payloadString, rid)
         }
         if (destinationName.indexOf('twin/PATCH/properties/desired') > 1) {
@@ -189,15 +189,20 @@ export class HubClient {
   }
 
   /**
-   * @param {{ (methodName: string, payload:string): void}} c2dCallback
+   * @param {{ (methodName: string, payload:string, rid:number): void}} c2dCallback
    */
   setDirectMehodCallback (c2dCallback) {
     this.c2dCallback = c2dCallback
   }
 
-  commandResponse (methodName, rid) {
+  /**
+   * @param {string} methodName
+   * @param {number} rid
+   * @param {number} status
+   */
+  commandResponse (methodName, rid, status) {
     const response = new Paho.MQTT.Message('')
-    response.destinationName = DIRECT_METHOD_RESPONSE_TOPIC.replace('{status}', '200') + rid
+    response.destinationName = DIRECT_METHOD_RESPONSE_TOPIC.replace('{status}', status.toString()) + rid.toString()
     this.client.send(response)
   }
 
