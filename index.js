@@ -18,7 +18,17 @@ const createApp = () => {
         status: 'Disconnected',
         connected: false
       },
-      commands: [],
+      commands: [
+        // {
+        //   method: 'MyCommand',
+        //   payload: JSON.stringify({
+        //     myCommandPayload: {
+        //       param1: 'value1',
+        //       param2: 'value2'
+        //     }
+        //   }, null, 2)
+        // }
+      ],
       reportedJson: '{}',
       desiredJson: '{}',
       reportedPropJson: '{ newProperty: "new value" }',
@@ -53,8 +63,8 @@ const createApp = () => {
           this.connectionInfo.deviceId,
           this.connectionInfo.deviceKey,
           this.connectionInfo.modelId)
-        client.setDirectMehodCallback((method, payload) => {
-          this.commands.push({ method, payload })
+        client.setDirectMehodCallback((method, payload, rid) => {
+          this.commands.push({ method, payload, rid })
         })
         client.setDesiredPropertyCallback((desired) => {
           this.desiredJson = desired
@@ -84,6 +94,13 @@ const createApp = () => {
         if (updateResult === 204) {
           await this.readTwin()
         }
+      },
+      cmdResponse (method, rid, status) {
+        console.log('sending response ' + method + rid)
+        client.commandResponse(method, rid, status)
+      },
+      clearCommands () {
+        this.commands = []
       },
       startTelemetry () {
         telemetryInterval = setInterval(() => {
