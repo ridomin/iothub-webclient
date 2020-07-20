@@ -78,10 +78,11 @@
             </div>
             <div>
                 <h4>Commands</h4>
+                <a href="#" @click="clearCommands()">clear commands</a>
                 <ul v-for="c in commands">
-                    <strong>{{ c.method }}</strong>
+                    <strong>{{ c.method }}</strong> {{ c.rid }}
                     <pre>{{ c.payload }}</pre>
-                    <button @click="cmdResponse(c.method)">Response OK</button>
+                    <button @click="cmdResponse(c.method, c.rid)">Response OK</button>
                 </ul>
             </div>
             

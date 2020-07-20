@@ -4,7 +4,7 @@ const DEVICE_TWIN_GET_TOPIC = '$iothub/twin/GET/?$rid='
 const DEVICE_TWIN_PUBLISH_TOPIC = '$iothub/twin/PATCH/properties/reported/?$rid='
 const DIRECT_METHOD_TOPIC = '$iothub/methods/POST/#'
 const DEVICE_TWIN_DESIRED_PROP_RES_TOPIC = '$iothub/twin/PATCH/properties/desired/#'
-const DIRECT_METHOD_RESPONSE_TOPiC = '$iothub/methods/res/{status}/?$rid='
+const DIRECT_METHOD_RESPONSE_TOPIC = '$iothub/methods/res/{status}/?$rid='
 /**
  *
  * @param {String} key
@@ -54,8 +54,9 @@ export class HubClient {
      * @description Callback when a commnand invocation is received
      * @param {string} method
      * @param {string} payload
+     * @param {number} rid
      */
-    this.c2dCallback = (method, payload) => {}
+    this.c2dCallback = (method, payload, rid) => {}
 
     /**
      * @description Callback for desired properties upadtes
@@ -97,8 +98,11 @@ export class HubClient {
           this._onUpdateTwinCompleted()
         }
         if (destinationName.indexOf('methods/POST') > 1) {
-          const methodName = destinationName.split('/')[3]
-          this.c2dCallback(methodName, payloadString)
+          const destParts = destinationName.split('/') // $iothub/methods/POST/myCommand/?$rid=2
+          const methodName = destParts[3]
+          const ridPart = destParts[4]
+          const rid = ridPart.split('=')[1]
+          this.c2dCallback(methodName, payloadString, rid)
         }
         if (destinationName.indexOf('twin/PATCH/properties/desired') > 1) {
           this.desiredPropCallback(payloadString)
@@ -191,8 +195,9 @@ export class HubClient {
     this.c2dCallback = c2dCallback
   }
 
-  commandResponse (methodName) {
+  commandResponse (methodName, rid) {
     const response = new Paho.MQTT.Message('')
+    response.destinationName = DIRECT_METHOD_RESPONSE_TOPIC.replace('{status}', '200') + rid
     this.client.send(response)
   }
 
