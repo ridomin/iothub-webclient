@@ -1,6 +1,8 @@
 # IoTHub WebClient
 
-Web application to connect to Azure IoT Hub from the browser
+Web application to connect to Azure IoT Hub from the browser (no server code required), written completely in JavaScript ES6
+
+[![JavaScript Style Guide](https://cdn.rawgit.com/standard/standard/master/badge.svg)](https://github.com/standard/standard)
 
 ## https://mqtt.rido.dev 
 
@@ -9,6 +11,7 @@ Web application to connect to Azure IoT Hub from the browser
 Azure IoT Hub support MQTT over web sockets enabling bi-directional communication.
 
 This app uses the [Eclipse Paho JavaScript Client](https://www.eclipse.org/paho/clients/js/) to communicate to Azure IoT Hub as described in [Communicate with your IoT hub using the MQTT protocol](https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-mqtt-support)
+
 
 ## Sample code
 

@@ -64,6 +64,13 @@
             <div>
                 <h4>Desired Properties</h4>
                 <pre>{{ desiredJson | pretty }}</pre>
+                <h5>Updates</h5>
+                <a href="#" @click="clearUpdates()">clear updates</a>
+                <ul v-for="dc in desiredCalls">
+                    <pre>{{ dc | pretty }}</pre>    
+                    <button @click="ackDesired(dc, 200)">ACK OK</button>
+                    <button @click="ackDesired(dc, 500)">ACK Fail</button>
+                </ul>
             </div>
 
             <div>
