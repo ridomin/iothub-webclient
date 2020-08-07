@@ -31,7 +31,8 @@ const createApp = () => {
       ],
       reportedJson: '{}',
       desiredJson: '{}',
-      reportedPropJson: '{ newProperty: "new value" }',
+      desiredCalls: [],
+      reportedPropJson: '{ deviceStatus: "200 OK" }',
       telemetryJson: '{ temperature: %d }',
       sentMessages: 0,
       isTelemetryRunning: false
@@ -67,7 +68,8 @@ const createApp = () => {
           this.commands.push({ method, payload, rid })
         })
         client.setDesiredPropertyCallback((desired) => {
-          this.desiredJson = desired
+          this.desiredCalls.push(desired)
+          this.readTwin()
         })
         client.disconnectCallback = (err) => {
           console.log(err)
@@ -114,6 +116,23 @@ const createApp = () => {
         clearInterval(telemetryInterval)
         this.isTelemetryRunning = false
         this.sentMessages = 0
+      },
+      async ackDesired (dc, status) {
+        const dco = JSON.parse(dc)
+        const firstEl = Object.keys(dco)[0]
+        const payload = {}
+        payload[firstEl] = {
+          value: dco[firstEl],
+          ac: status,
+          av: dco.$version
+        }
+        const updateResult = await client.updateTwin(JSON.stringify(payload))
+        if (updateResult === 204) {
+          await this.readTwin()
+        }
+      },
+      clearUpdates () {
+        this.desiredCalls = []
       }
     },
     computed: {
