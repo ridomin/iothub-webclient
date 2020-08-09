@@ -58,7 +58,7 @@ const createApp = () => {
         client.setDirectMehodCallback((method, payload, rid) => {
           const response = JSON.stringify({ responsePayload: 'sample response' })
           /** @type {CommandInfo} */
-          const command = { method, payload, rid, response }
+          const command = { method, payload, rid, response, dirty: false }
           this.commands.push(command)
         })
         client.setDesiredPropertyCallback((desired) => {
@@ -91,9 +91,15 @@ const createApp = () => {
           await this.readTwin()
         }
       },
-      cmdResponse (method, response, rid, status) {
+      /**
+       *
+       * @param {CommandInfo} cmd
+       * @param {number} status
+       */
+      cmdResponse (cmd, status) {
         // console.log('sending response ' + method + response + rid)
-        client.commandResponse(method, response, rid, status)
+        client.commandResponse(cmd.method, cmd.response, cmd.rid, status)
+        cmd.dirty = true
       },
       clearCommands () {
         this.commands = []

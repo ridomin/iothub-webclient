@@ -5,7 +5,7 @@
   "repository": "https://github.com/ridomin/iothub-webclient",
   "scripts": {
     "start": "node node_modules/serve/bin/serve.js .",
-    "build" : "echo build not needed :)"
+    "build" : "echo build not needed :-)"
   },
   "keywords": [
     "iot",
