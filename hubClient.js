@@ -200,8 +200,8 @@ export class HubClient {
    * @param {number} rid
    * @param {number} status
    */
-  commandResponse (methodName, rid, status) {
-    const response = new Paho.MQTT.Message('')
+  commandResponse (methodName, payload, rid, status) {
+    const response = new Paho.MQTT.Message(payload)
     response.destinationName = DIRECT_METHOD_RESPONSE_TOPIC.replace('{status}', status.toString()) + rid.toString()
     this.client.send(response)
   }

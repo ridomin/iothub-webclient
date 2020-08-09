@@ -18,17 +18,8 @@ const createApp = () => {
         status: 'Disconnected',
         connected: false
       },
-      commands: [
-        // {
-        //   method: 'MyCommand',
-        //   payload: JSON.stringify({
-        //     myCommandPayload: {
-        //       param1: 'value1',
-        //       param2: 'value2'
-        //     }
-        //   }, null, 2)
-        // }
-      ],
+      /** @type {Array<CommandInfo>} */
+      commands: [],
       reportedJson: '{}',
       desiredJson: '{}',
       desiredCalls: [],
@@ -65,7 +56,10 @@ const createApp = () => {
           this.connectionInfo.deviceKey,
           this.connectionInfo.modelId)
         client.setDirectMehodCallback((method, payload, rid) => {
-          this.commands.push({ method, payload, rid })
+          const response = JSON.stringify({ responsePayload: 'sample response' })
+          /** @type {CommandInfo} */
+          const command = { method, payload, rid, response, dirty: false }
+          this.commands.push(command)
         })
         client.setDesiredPropertyCallback((desired) => {
           this.desiredCalls.push(desired)
@@ -97,9 +91,15 @@ const createApp = () => {
           await this.readTwin()
         }
       },
-      cmdResponse (method, rid, status) {
-        console.log('sending response ' + method + rid)
-        client.commandResponse(method, rid, status)
+      /**
+       *
+       * @param {CommandInfo} cmd
+       * @param {number} status
+       */
+      cmdResponse (cmd, status) {
+        // console.log('sending response ' + method + response + rid)
+        client.commandResponse(cmd.method, cmd.response, cmd.rid, status)
+        cmd.dirty = true
       },
       clearCommands () {
         this.commands = []
