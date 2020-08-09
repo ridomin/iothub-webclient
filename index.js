@@ -34,6 +34,7 @@ const createApp = () => {
       desiredCalls: [],
       reportedPropJson: '{ deviceStatus: "200 OK" }',
       telemetryJson: '{ temperature: %d }',
+      commandPayloadJson: '{ response: "Command Received" }',
       sentMessages: 0,
       isTelemetryRunning: false
     },
@@ -97,9 +98,9 @@ const createApp = () => {
           await this.readTwin()
         }
       },
-      cmdResponse (method, rid, status) {
-        console.log('sending response ' + method + rid)
-        client.commandResponse(method, rid, status)
+      cmdResponse (method, payload, rid, status) {
+        console.log('sending response ' + method + payload + rid)
+        client.commandResponse(method, payload, rid, status)
       },
       clearCommands () {
         this.commands = []

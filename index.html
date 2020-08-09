@@ -89,8 +89,9 @@
                 <ul v-for="c in commands">
                     <strong>{{ c.method }}</strong> {{ c.rid }}
                     <pre>{{ c.payload }}</pre>
-                    <button @click="cmdResponse(c.method, c.rid, 200)">Response OK</button>
-                    <button @click="cmdResponse(c.method, c.rid, 500)">Failed</button>
+                    <textarea cols="50" rows="3" v-model="commandPayloadJson"></textarea>
+                    <button @click="cmdResponse(c.method, commandPayloadJson, c.rid, 200)">Response OK</button>
+                    <button @click="cmdResponse(c.method, commandPayloadJson, c.rid, 500)">Failed</button>
                 </ul>
             </div>
             
