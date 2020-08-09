@@ -22,19 +22,26 @@ const createHmac = async (key, msg) => {
   return window.btoa(String.fromCharCode(...new Uint8Array(signature)))
 }
 
+/**
+ * @param {string} resourceUri
+ * @param {string} signingKey
+ * @param {string | null} policyName
+ * @param {number} expiresInMins
+ * @returns {Promise<string>}
+ */
 async function generateSasToken (resourceUri, signingKey, policyName, expiresInMins) {
   resourceUri = encodeURIComponent(resourceUri)
-  var expires = (Date.now() / 1000) + expiresInMins * 60
+  let expires = (Date.now() / 1000) + expiresInMins * 60
   expires = Math.ceil(expires)
-  var toSign = resourceUri + '\n' + expires
-  var hmac = await createHmac(signingKey, toSign)
-  var base64UriEncoded = encodeURIComponent(hmac)
-  var token = 'SharedAccessSignature sr=' + resourceUri + '&sig=' + base64UriEncoded + '&se=' + expires
+  const toSign = resourceUri + '\n' + expires
+  const hmac = await createHmac(signingKey, toSign)
+  const base64UriEncoded = encodeURIComponent(hmac)
+  let token = 'SharedAccessSignature sr=' + resourceUri + '&sig=' + base64UriEncoded + '&se=' + expires
   if (policyName) token += '&skn=' + policyName
   return token
 }
 
-export class HubClient {
+export class AzIoTHubClient {
   /**
    * @param {string} host
    * @param {string} deviceId
@@ -63,7 +70,13 @@ export class HubClient {
      * @param {string} desired
      */
     this.desiredPropCallback = (desired) => {}
+    /**
+     * @param {any} err
+     */
     this.disconnectCallback = (err) => { console.log(err) }
+    /**
+     * @param {any} twin
+     */
     this._onReadTwinCompleted = (twin) => {}
     this._onUpdateTwinCompleted = () => {}
   }
@@ -157,6 +170,9 @@ export class HubClient {
     readTwinMessage.destinationName = DEVICE_TWIN_GET_TOPIC + this.rid
     this.client.send(readTwinMessage)
     return new Promise((resolve, reject) => {
+      /**
+       * @param {string} twin
+       */
       this._onReadTwinCompleted = (twin) => {
         resolve(JSON.parse(twin))
       }

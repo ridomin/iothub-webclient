@@ -1,8 +1,8 @@
-import { HubClient } from './hubClient.js'
+import { AzIoTHubClient } from './AzIoTHubClient.js'
 
 const createApp = () => {
   let telemetryInterval
-  /** @type {HubClient} client */
+  /** @type {AzIoTHubClient} client */
   let client
   // @ts-ignore
   const app = new Vue({
@@ -51,7 +51,7 @@ const createApp = () => {
               }))
         }
         const host = `${this.connectionInfo.hubName}.azure-devices.net`
-        client = new HubClient(host,
+        client = new AzIoTHubClient(host,
           this.connectionInfo.deviceId,
           this.connectionInfo.deviceKey,
           this.connectionInfo.modelId)
