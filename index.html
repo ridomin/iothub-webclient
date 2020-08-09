@@ -88,10 +88,10 @@
                 <a href="#" @click="clearCommands()">clear commands</a>
                 <ul v-for="c in commands">
                     <strong>{{ c.method }}</strong> {{ c.rid }}
-                    <pre>{{ c.payload }}</pre>
-                    <textarea cols="50" rows="3" v-model="commandPayloadJson"></textarea>
-                    <button @click="cmdResponse(c.method, commandPayloadJson, c.rid, 200)">Response OK</button>
-                    <button @click="cmdResponse(c.method, commandPayloadJson, c.rid, 500)">Failed</button>
+                    <pre>{{ c.payload | pretty }}</pre>
+                    <textarea cols="50" rows="3" v-model="c.response"></textarea>
+                    <button @click="cmdResponse(c.method, c.response, c.rid, 200)">Response OK</button>
+                    <button @click="cmdResponse(c.method, c.response, c.rid, 500)">Failed</button>
                 </ul>
             </div>
             
