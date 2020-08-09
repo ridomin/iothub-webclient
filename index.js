@@ -34,7 +34,7 @@ const createApp = () => {
       desiredCalls: [],
       reportedPropJson: '{ deviceStatus: "200 OK" }',
       telemetryJson: '{ temperature: %d }',
-      commandPayloadJson: '{ response: "Command Received" }',
+      commandPayloadJson: '{ "response": "Command Received" }',
       sentMessages: 0,
       isTelemetryRunning: false
     },
