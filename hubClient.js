@@ -197,6 +197,7 @@ export class HubClient {
 
   /**
    * @param {string} methodName
+   * @param {string} payload
    * @param {number} rid
    * @param {number} status
    */
