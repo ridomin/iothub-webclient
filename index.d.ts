@@ -16,5 +16,6 @@ type CommandInfo = {
     method: string,
     payload: string,
     response: string,
-    rid: number
+    rid: number,
+    dirty: boolean
 }
