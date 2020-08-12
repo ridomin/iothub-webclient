@@ -1,4 +1,5 @@
 import { AzIoTHubClient } from './AzIoTHubClient.js'
+import * as vf from './versionFromFile.js'
 
 const createApp = () => {
   let telemetryInterval
@@ -26,7 +27,8 @@ const createApp = () => {
       reportedPropJson: '{ deviceStatus: "200 OK" }',
       telemetryJson: '{ temperature: %d }',
       sentMessages: 0,
-      isTelemetryRunning: false
+      isTelemetryRunning: false,
+      versionInfo: ''
     },
     created () {
       /** @type { ConnectionInfo } connInfo */
@@ -37,6 +39,9 @@ const createApp = () => {
         this.connectionInfo.deviceKey = connInfo.deviceKey
         this.connectionInfo.modelId = connInfo.modelId
       }
+      vf.versionFromFile(v => {
+        this.versionInfo = v
+      })
     },
     methods: {
       async connect () {

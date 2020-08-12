@@ -46,7 +46,7 @@
         </form>
 
         <div v-show="connectionInfo.connected">
-            device <strong>{{ connectionInfo.deviceId }}</strong> connected to hub <strong>{{ connectionInfo.hubName }}</strong>
+            device <strong>{{ connectionInfo.deviceId }}</strong> connected to hub <strong>{{ connectionInfo.hubName }}</strong> <pre>{{ versionInfo }}</pre>
         </div>
 
         <div v-show="connectionInfo.connected">
@@ -98,14 +98,15 @@
             </div>
             
         </div>
+        <div class="footer">
+            <i>
+                Using <a href="https://github.com/eclipse/paho.mqtt.javascript">paho.mqtt.javascript</a> to communicate with Azure IoT hub. 
+                by <a href="https://twitter.com/ridomin">ridomin</a> <a href="http://github.com/ridomin/iothub-webclient">source </a> <pre>{{ versionInfo }}</pre>
+            </i>
+        </div>
     </div>
     <script src="index.js" type="module"></script>
-    <div class="footer">
-        <i>
-            Using <a href="https://github.com/eclipse/paho.mqtt.javascript">paho.mqtt.javascript</a> to communicate with Azure IoT hub. 
-            <a href="http://github.com/ridomin/iothub-webclient">source 0.0.01</a> by <a href="https://twitter.com/ridomin">ridomin</a>
-        </i>
-    </div>
+
 <!-- Global site tag (gtag.js) - Google Analytics -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=UA-66818411-7"></script>
 <script>
@@ -115,5 +116,6 @@
 
   gtag('config', 'UA-66818411-7');
 </script>
+
 </body>
 </html>
