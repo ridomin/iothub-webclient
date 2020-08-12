@@ -1,10 +1,10 @@
 const WEB_SOCKET = '/$iothub/websocket?iothub-no-client-cert=true'
 const DEVICE_TWIN_RES_TOPIC = '$iothub/twin/res/#'
 const DEVICE_TWIN_GET_TOPIC = '$iothub/twin/GET/?$rid='
-const DEVICE_TWIN_PUBLISH_TOPIC = '$iothub/twin/PATCH/properties/reported/?$rid=%d'
+const DEVICE_TWIN_PUBLISH_TOPIC = '$iothub/twin/PATCH/properties/reported/?$rid='
 const DIRECT_METHOD_TOPIC = '$iothub/methods/POST/#'
 const DEVICE_TWIN_DESIRED_PROP_RES_TOPIC = '$iothub/twin/PATCH/properties/desired/#'
-
+const DIRECT_METHOD_RESPONSE_TOPIC = '$iothub/methods/res/{status}/?$rid='
 /**
  *
  * @param {String} key
@@ -22,19 +22,26 @@ const createHmac = async (key, msg) => {
   return window.btoa(String.fromCharCode(...new Uint8Array(signature)))
 }
 
+/**
+ * @param {string} resourceUri
+ * @param {string} signingKey
+ * @param {string | null} policyName
+ * @param {number} expiresInMins
+ * @returns {Promise<string>}
+ */
 async function generateSasToken (resourceUri, signingKey, policyName, expiresInMins) {
   resourceUri = encodeURIComponent(resourceUri)
-  var expires = (Date.now() / 1000) + expiresInMins * 60
+  let expires = (Date.now() / 1000) + expiresInMins * 60
   expires = Math.ceil(expires)
-  var toSign = resourceUri + '\n' + expires
-  var hmac = await createHmac(signingKey, toSign)
-  var base64UriEncoded = encodeURIComponent(hmac)
-  var token = 'SharedAccessSignature sr=' + resourceUri + '&sig=' + base64UriEncoded + '&se=' + expires
+  const toSign = resourceUri + '\n' + expires
+  const hmac = await createHmac(signingKey, toSign)
+  const base64UriEncoded = encodeURIComponent(hmac)
+  let token = 'SharedAccessSignature sr=' + resourceUri + '&sig=' + base64UriEncoded + '&se=' + expires
   if (policyName) token += '&skn=' + policyName
   return token
 }
 
-export class HubClient {
+export class AzIoTHubClient {
   /**
    * @param {string} host
    * @param {string} deviceId
@@ -49,18 +56,43 @@ export class HubClient {
     this.modelId = modelId
     this.rid = 0
     this.client = new Paho.MQTT.Client(this.host, Number(443), WEB_SOCKET, this.deviceId)
-    this.c2dCallback = (method, payload) => {}
+
+    /**
+     * @description Callback when a commnand invocation is received
+     * @param {string} method
+     * @param {string} payload
+     * @param {number} rid
+     */
+    this.c2dCallback = (method, payload, rid) => {}
+
+    /**
+     * @description Callback for desired properties upadtes
+     * @param {string} desired
+     */
     this.desiredPropCallback = (desired) => {}
+    /**
+     * @param {any} err
+     */
+    this.disconnectCallback = (err) => { console.log(err) }
+    /**
+     * @param {any} twin
+     */
     this._onReadTwinCompleted = (twin) => {}
+    this._onUpdateTwinCompleted = () => {}
   }
 
+  /**
+   * @description Connects to Azure IoT Hub using MQTT over websockets
+   */
   async connect () {
     let userName = `${this.host}/${this.deviceId}/?api-version=2020-05-31-preview`
     if (this.modelId) userName += `&model-id=${this.modelId}`
     const password = await generateSasToken(`${this.host}/devices/${this.deviceId}`, this.key, null, 60)
     return new Promise((resolve, reject) => {
       this.client.onConnectionLost = (err) => {
+        console.log(err)
         this.connected = false
+        this.disconnectCallback(err)
         reject(err)
       }
 
@@ -70,14 +102,20 @@ export class HubClient {
       this.client.onMessageArrived = (/** @type {Paho.MQTT.Message} */ m) => {
         const destinationName = m.destinationName
         const payloadString = m.payloadString
-        // console.log('On Msg Arrived to ' + destinationName)
-        // console.log(payloadString)
-        if (destinationName.indexOf('twin/res') > 0) {
+        console.log('On Msg Arrived to ' + destinationName)
+        console.log(payloadString)
+        if (destinationName === '$iothub/twin/res/200/?$rid=' + this.rid) {
           this._onReadTwinCompleted(payloadString)
         }
+        if (destinationName.startsWith('$iothub/twin/res/204/?$rid=' + this.rid)) {
+          this._onUpdateTwinCompleted()
+        }
         if (destinationName.indexOf('methods/POST') > 1) {
-          const methodName = destinationName.split('/')[3]
-          this.c2dCallback(methodName, payloadString)
+          const destParts = destinationName.split('/') // $iothub/methods/POST/myCommand/?$rid=2
+          const methodName = destParts[3]
+          const ridPart = destParts[4]
+          const rid = parseInt(ridPart.split('=')[1])
+          this.c2dCallback(methodName, payloadString, rid)
         }
         if (destinationName.indexOf('twin/PATCH/properties/desired') > 1) {
           this.desiredPropCallback(payloadString)
@@ -122,15 +160,22 @@ export class HubClient {
     })
   }
 
+  /**
+   * @return {Promise<DeviceTwin>}
+   */
   getTwin () {
+    this.rid = Date.now()
+    console.log(this.rid)
+    const readTwinMessage = new Paho.MQTT.Message('')
+    readTwinMessage.destinationName = DEVICE_TWIN_GET_TOPIC + this.rid
+    this.client.send(readTwinMessage)
     return new Promise((resolve, reject) => {
-      this.rid = Date.now()
-      const readTwinMessage = new Paho.MQTT.Message('')
-      readTwinMessage.destinationName = DEVICE_TWIN_GET_TOPIC + this.rid
+      /**
+       * @param {string} twin
+       */
       this._onReadTwinCompleted = (twin) => {
-        resolve(twin)
+        resolve(JSON.parse(twin))
       }
-      this.client.send(readTwinMessage)
     })
   }
 
@@ -138,9 +183,16 @@ export class HubClient {
    * @param {string} reportedProperties
    */
   updateTwin (reportedProperties) {
+    this.rid = Date.now()
+    console.log(this.rid)
     const reportedTwinMessage = new Paho.MQTT.Message(reportedProperties)
-    reportedTwinMessage.destinationName = DEVICE_TWIN_PUBLISH_TOPIC
+    reportedTwinMessage.destinationName = DEVICE_TWIN_PUBLISH_TOPIC + this.rid
     this.client.send(reportedTwinMessage)
+    return new Promise((resolve, reject) => {
+      this._onUpdateTwinCompleted = () => {
+        resolve(204)
+      }
+    })
   }
 
   /**
@@ -153,10 +205,22 @@ export class HubClient {
   }
 
   /**
-   * @param {{ (methodName: string, payload:string): void}} c2dCallback
+   * @param {{ (methodName: string, payload:string, rid:number): void}} c2dCallback
    */
   setDirectMehodCallback (c2dCallback) {
     this.c2dCallback = c2dCallback
+  }
+
+  /**
+   * @param {string} methodName
+   * @param {string} payload
+   * @param {number} rid
+   * @param {number} status
+   */
+  commandResponse (methodName, payload, rid, status) {
+    const response = new Paho.MQTT.Message(payload)
+    response.destinationName = DIRECT_METHOD_RESPONSE_TOPIC.replace('{status}', status.toString()) + rid.toString()
+    this.client.send(response)
   }
 
   /**

@@ -7,7 +7,7 @@
     <title>Azure IoT Hub Web Client</title>
     <!-- This is a development version of Vue.js! -->
     <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
-    <script src="paho-mqtt-min.js"></script>
+    <script src="lib/paho-mqtt.js"></script>
     <link rel="stylesheet" href="s.css">
 </head>
 
@@ -27,11 +27,11 @@
             </p>
             <p>
                 <label for="inputDeviceKey">DeviceKey</label>
-                <input type="text" id="inputDeviceKey" size="60" v-model='connectionInfo.deviceKey'>
+                <input type="text" id="inputDeviceKey" size="45" v-model='connectionInfo.deviceKey'>
             </p>
             <p>
                 <label for="inputModelId">Model Id</label>
-                <input type="text" id="inputModelId" size="60" v-model='connectionInfo.modelId'>
+                <input type="text" id="inputModelId" size="45" v-model='connectionInfo.modelId'>
             </p>
 
             <div class="right">
@@ -64,6 +64,13 @@
             <div>
                 <h4>Desired Properties</h4>
                 <pre>{{ desiredJson | pretty }}</pre>
+                <h5>Updates</h5>
+                <a href="#" @click="clearUpdates()">clear updates</a>
+                <ul v-for="dc in desiredCalls">
+                    <pre>{{ dc | pretty }}</pre>    
+                    <button @click="ackDesired(dc, 200)">ACK OK</button>
+                    <button @click="ackDesired(dc, 500)">ACK Fail</button>
+                </ul>
             </div>
 
             <div>
@@ -78,9 +85,15 @@
             </div>
             <div>
                 <h4>Commands</h4>
+                <a href="#" @click="clearCommands()">clear commands</a>
                 <ul v-for="c in commands">
-                    <li>{{ c.method }}</li>
-                    <li>{{ c.payload }}</li>
+                    <strong>{{ c.method }}</strong> {{ c.rid }}
+                    <pre>{{ c.payload | pretty }}</pre>
+                    <div v-if="c.dirty===false">
+                        <textarea cols="50" rows="3" v-model="c.response"></textarea>
+                        <button @click="cmdResponse(c, 200)">Response OK</button>
+                        <button @click="cmdResponse(c, 500)">Failed</button>
+                    </div>
                 </ul>
             </div>
             
@@ -90,7 +103,7 @@
     <div class="footer">
         <i>
             Using <a href="https://github.com/eclipse/paho.mqtt.javascript">paho.mqtt.javascript</a> to communicate with Azure IoT hub. 
-            <a href="http://github.com/ridomin/iothub-webclient">source</a> by <a href="https://twitter.com/ridomin">ridomin</a>
+            <a href="http://github.com/ridomin/iothub-webclient">source 0.0.01</a> by <a href="https://twitter.com/ridomin">ridomin</a>
         </i>
     </div>
 <!-- Global site tag (gtag.js) - Google Analytics -->

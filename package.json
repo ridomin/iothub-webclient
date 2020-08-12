@@ -4,7 +4,8 @@
   "description": "Web application to connect to Azure IoT Hub from the browser",
   "repository": "https://github.com/ridomin/iothub-webclient",
   "scripts": {
-    "start": "node node_modules/serve/bin/serve.js ."
+    "start": "node node_modules/serve/bin/serve.js .",
+    "build" : "echo build not needed :-)"
   },
   "keywords": [
     "iot",
@@ -21,6 +22,10 @@
     "globals": [
       "Paho",
       "Vue"
+    ],
+    "ignore": [
+      "lib/**",
+      "*.d.ts"
     ]
   }
 }

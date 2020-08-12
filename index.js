@@ -1,8 +1,8 @@
-import { HubClient } from './hubClient.js'
+import { AzIoTHubClient } from './AzIoTHubClient.js'
 
 const createApp = () => {
   let telemetryInterval
-  /** @type {HubClient} client */
+  /** @type {AzIoTHubClient} client */
   let client
   // @ts-ignore
   const app = new Vue({
@@ -18,10 +18,12 @@ const createApp = () => {
         status: 'Disconnected',
         connected: false
       },
+      /** @type {Array<CommandInfo>} */
       commands: [],
       reportedJson: '{}',
       desiredJson: '{}',
-      reportedPropJson: '{ newProperty: "new value" }',
+      desiredCalls: [],
+      reportedPropJson: '{ deviceStatus: "200 OK" }',
       telemetryJson: '{ temperature: %d }',
       sentMessages: 0,
       isTelemetryRunning: false
@@ -41,39 +43,66 @@ const createApp = () => {
         if (this.saveConfig) {
           window.localStorage.setItem('connectionInfo',
             JSON.stringify(
-              { 
-                hubName: this.connectionInfo.hubName, 
-                deviceId: this.connectionInfo.deviceId, 
+              {
+                hubName: this.connectionInfo.hubName,
+                deviceId: this.connectionInfo.deviceId,
                 deviceKey: this.connectionInfo.deviceKey,
-                modelId: this.connectionInfo.modelId 
+                modelId: this.connectionInfo.modelId
               }))
         }
         const host = `${this.connectionInfo.hubName}.azure-devices.net`
-        client = new HubClient(host, 
-            this.connectionInfo.deviceId, 
-            this.connectionInfo.deviceKey, 
-            this.connectionInfo.modelId)
-        client.setDirectMehodCallback((method, payload) => {
-          this.commands.push({ method, payload })
+        client = new AzIoTHubClient(host,
+          this.connectionInfo.deviceId,
+          this.connectionInfo.deviceKey,
+          this.connectionInfo.modelId)
+        client.setDirectMehodCallback((method, payload, rid) => {
+          const response = JSON.stringify({ responsePayload: 'sample response' })
+          /** @type {CommandInfo} */
+          const command = { method, payload, rid, response, dirty: false }
+          this.commands.push(command)
         })
         client.setDesiredPropertyCallback((desired) => {
-          this.desiredJson = desired
+          this.desiredCalls.push(desired)
+          this.readTwin()
         })
+        client.disconnectCallback = (err) => {
+          console.log(err)
+          this.connectionInfo.connected = false
+          this.connectionInfo.status = 'Disconnected'
+        }
         await client.connect()
         this.connectionInfo.status = 'Connected'
         this.connectionInfo.connected = true
         await this.readTwin()
       },
       async readTwin () {
-        const twin = await client.getTwin()
-        const msgObj = JSON.parse(twin)
-
-        this.reportedJson = JSON.stringify(msgObj.reported)
-        this.desiredJson = JSON.stringify(msgObj.desired)
+        if (client.connected) {
+          const twin = await client.getTwin()
+          this.reportedJson = JSON.stringify(twin.reported)
+          this.desiredJson = JSON.stringify(twin.desired)
+        } else {
+          console.log('not connected')
+        }
       },
       async reportProp () {
-        client.updateTwin(this.reportedPropJson)
-        await this.readTwin()
+        const payload = this.reportedPropJson
+        const updateResult = await client.updateTwin(payload)
+        if (updateResult === 204) {
+          await this.readTwin()
+        }
+      },
+      /**
+       *
+       * @param {CommandInfo} cmd
+       * @param {number} status
+       */
+      cmdResponse (cmd, status) {
+        // console.log('sending response ' + method + response + rid)
+        client.commandResponse(cmd.method, cmd.response, cmd.rid, status)
+        cmd.dirty = true
+      },
+      clearCommands () {
+        this.commands = []
       },
       startTelemetry () {
         telemetryInterval = setInterval(() => {
@@ -87,6 +116,23 @@ const createApp = () => {
         clearInterval(telemetryInterval)
         this.isTelemetryRunning = false
         this.sentMessages = 0
+      },
+      async ackDesired (dc, status) {
+        const dco = JSON.parse(dc)
+        const firstEl = Object.keys(dco)[0]
+        const payload = {}
+        payload[firstEl] = {
+          value: dco[firstEl],
+          ac: status,
+          av: dco.$version
+        }
+        const updateResult = await client.updateTwin(JSON.stringify(payload))
+        if (updateResult === 204) {
+          await this.readTwin()
+        }
+      },
+      clearUpdates () {
+        this.desiredCalls = []
       }
     },
     computed: {
@@ -95,7 +141,7 @@ const createApp = () => {
       }
     },
     filters: {
-      pretty:function (value) {
+      pretty: function (value) {
         return JSON.stringify(JSON.parse(value), null, 2)
       }
     }
