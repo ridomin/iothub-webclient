@@ -5,7 +5,7 @@
   "repository": "https://github.com/ridomin/iothub-webclient",
   "scripts": {
     "start": "node node_modules/serve/bin/serve.js .",
-    "build": "node node_modules/git-commit-stamper/build/bin/git-commit-stamper.js "
+    "build": "_tools/git-version-stamper.js"
   },
   "keywords": [
     "iot",
