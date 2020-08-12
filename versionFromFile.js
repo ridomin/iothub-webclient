@@ -4,7 +4,7 @@ async function versionFromFile (cb) {
       j.json()
         .then(d => {
           console.log(d)
-          cb(d.version)
+          cb(d.shortHash)
         })
     })
 }

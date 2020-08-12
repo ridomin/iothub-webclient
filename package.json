@@ -5,7 +5,7 @@
   "repository": "https://github.com/ridomin/iothub-webclient",
   "scripts": {
     "start": "node node_modules/serve/bin/serve.js .",
-    "build" : "echo build not needed :-)"
+    "build": "node node_modules/git-commit-stamper/build/bin/git-commit-stamper.js "
   },
   "keywords": [
     "iot",
@@ -15,6 +15,7 @@
   "license": "ISC",
   "devDependencies": {
     "@types/paho-mqtt": "^1.0.4",
+    "git-last-commit": "^1.0.0",
     "serve": "^11.3.2",
     "standard": "^14.3.4"
   },
