@@ -1,0 +1,20 @@
+{
+    "shortHash": "c5fd5ea",
+    "hash": "c5fd5ea31bd203ef1ba419cb509110903a048f90",
+    "subject": "show commit version",
+    "sanitizedSubject": "show-commit-version",
+    "body": "",
+    "authoredOn": "1597224359",
+    "committedOn": "1597224359",
+    "author": {
+        "name": "ridomin",
+        "email": "ridomin@live.com"
+    },
+    "committer": {
+        "name": "ridomin",
+        "email": "ridomin@live.com"
+    },
+    "notes": "",
+    "branch": "cicd",
+    "tags": []
+}
