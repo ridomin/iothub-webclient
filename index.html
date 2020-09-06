@@ -12,9 +12,9 @@
 </head>
 
 <body>
-    <h1>Azure IoT Hub Web Client</h1>
     <div id="app">
         <form v-show="!connectionInfo.connected">
+            <h1>Azure IoT Hub Web Client</h1>
             <h3>Connection Details</h3>
             <p>
                 <label for="inputHostName">Hub Name</label>
@@ -45,8 +45,8 @@
             </p>
         </form>
 
-        <div v-show="connectionInfo.connected">
-            device <strong>{{ connectionInfo.deviceId }}</strong> connected to hub
+        <div v-show="connectionInfo.connected" class="connected">
+            Device <strong>{{ connectionInfo.deviceId }}</strong> connected to IoT Hub
             <strong>{{ connectionInfo.hubName }}</strong>
         </div>
 

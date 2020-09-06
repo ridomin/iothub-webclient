@@ -15,3 +15,10 @@ table,tr,td {
   padding:20px;  
   width: 100%;
 }
+.connected {
+  background-color: lightgreen;
+  top:0px;
+  left:0px;
+  position: fixed;
+  width: 100%;
+}
