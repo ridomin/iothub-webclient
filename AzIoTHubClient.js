@@ -230,3 +230,22 @@ export class AzIoTHubClient {
     this.desiredPropCallback = desiredPropCallback
   }
 }
+
+export /**
+ * @param {{ [x: string]: any; }} propValues
+ * @param {number} ac
+ * @param {number} av
+ */
+const ackPayload = (propValues, ac, av) => {
+  const ack = (ac, av, value, __t) => { return { __t, ac, av, value } }
+  const payload = {}
+  Object.keys(propValues).filter(k => k !== '$version').forEach(k => {
+    if (propValues[k].__t === 'c') {
+      delete propValues[k].__t
+      payload[k] = ack(ac, av, propValues[k], 'c')
+    } else {
+      payload[k] = ack(ac, av, propValues[k])
+    }
+  })
+  return payload
+}

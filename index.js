@@ -1,4 +1,4 @@
-import { AzIoTHubClient } from './AzIoTHubClient.js'
+import { AzIoTHubClient, ackPayload } from './AzIoTHubClient.js'
 
 const createApp = () => {
   let telemetryInterval
@@ -61,7 +61,7 @@ const createApp = () => {
           const command = { method, payload, rid, response, dirty: false }
           this.commands.push(command)
         })
-        client.setDesiredPropertyCallback((desired) => {
+        client.setDesiredPropertyCallback(desired => {
           this.desiredCalls.push(desired)
           this.readTwin()
         })
@@ -119,17 +119,11 @@ const createApp = () => {
       },
       async ackDesired (dc, status) {
         const dco = JSON.parse(dc)
-        const firstEl = Object.keys(dco)[0]
-        const payload = {}
-        payload[firstEl] = {
-          value: dco[firstEl],
-          ac: status,
-          av: dco.$version
-        }
+        const payload = ackPayload(dco, status, dco.$version)
         const updateResult = await client.updateTwin(JSON.stringify(payload))
         if (updateResult === 204) {
           await this.readTwin()
-        }
+        } else console.log('error updating ack' + updateResult)
       },
       clearUpdates () {
         this.desiredCalls = []
