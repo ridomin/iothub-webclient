@@ -41,79 +41,94 @@
                 <input type="button" id="btnConnect" value="Connect" @click="connect()">
             </div>
             <p>
-                <pre>{{ connectionString }}</pre>
+            <pre>{{ connectionString }}</pre>
             </p>
         </form>
 
         <div v-show="connectionInfo.connected">
-            device <strong>{{ connectionInfo.deviceId }}</strong> connected to hub <strong>{{ connectionInfo.hubName }}</strong>
+            device <strong>{{ connectionInfo.deviceId }}</strong> connected to hub
+            <strong>{{ connectionInfo.hubName }}</strong>
         </div>
 
         <div v-show="connectionInfo.connected">
-            <h3>Device Twin</h3>
-            <button @click="readTwin()">Refresh Twin</button>
-            <div>
-                <h4>Reported Properties</h4>
-                <pre>{{ reportedJson | pretty }}</pre>
-                <div>
-                    <textarea cols="50" rows="5" v-model="reportedPropJson"></textarea>
-                </div>
-                <button @click="reportProp()">Report Prop</button>
-            </div>
+            <table>
+                <tr>
+                    <td>
+                        <div>
+                            <h4>Reported Properties</h4>
+                            <pre>{{ reportedJson | pretty }}</pre>
+                            <div>
+                                <textarea cols="30" rows="5" v-model="reportedPropJson"></textarea>
+                            </div>
+                            <button @click="reportProp()">Report Prop</button>
+                            <button @click="readTwin()">Refresh Twin</button>
+                        </div>
+                    </td>
+                    <td>
+                        <div>
+                            <h4>Desired Properties</h4>
+                            <pre>{{ desiredJson | pretty }}</pre>
+                            <h5>Updates
+                                <a href="#" @click="clearUpdates()">(clear)</a>
+                            </h5>
+                            <ul v-for="dc in desiredCalls">
+                                <pre>{{ dc | pretty }}</pre>
+                                <button @click="ackDesired(dc, 200)">ACK OK</button>
+                                <button @click="ackDesired(dc, 500)">ACK Fail</button>
+                            </ul>
+                        </div>
+                    </td>
+                   
+                    <td>
+                        <div>
+                            <h4>Telemetry</h4>
+                            <div>
+                                <textarea cols="30" rows="3" v-model="telemetryJson"></textarea>
+                            </div>
+                            <button @click="startTelemetry()" v-show="!isTelemetryRunning">Start Telemetry</button>
+                            <button @click="stopTelemetry()" v-show="isTelemetryRunning">Stop Telemetry</button>
 
-            <div>
-                <h4>Desired Properties</h4>
-                <pre>{{ desiredJson | pretty }}</pre>
-                <h5>Updates</h5>
-                <a href="#" @click="clearUpdates()">clear updates</a>
-                <ul v-for="dc in desiredCalls">
-                    <pre>{{ dc | pretty }}</pre>    
-                    <button @click="ackDesired(dc, 200)">ACK OK</button>
-                    <button @click="ackDesired(dc, 500)">ACK Fail</button>
-                </ul>
-            </div>
-
-            <div>
-                <h4>Telemetry</h4>
-                <div>
-                    <textarea cols="50" rows="3" v-model="telemetryJson"></textarea>
-                </div>
-                <button @click="startTelemetry()" v-show="!isTelemetryRunning">Start Telemetry</button>
-                <button @click="stopTelemetry()" v-show="isTelemetryRunning">Stop Telemetry</button>
-
-                <span>Messages sent {{ sentMessages }}</span>
-            </div>
-            <div>
-                <h4>Commands</h4>
-                <a href="#" @click="clearCommands()">clear commands</a>
-                <ul v-for="c in commands">
-                    <strong>{{ c.method }}</strong> {{ c.rid }}
-                    <pre>{{ c.payload | pretty }}</pre>
-                    <div v-if="c.dirty===false">
-                        <textarea cols="50" rows="3" v-model="c.response"></textarea>
-                        <button @click="cmdResponse(c, 200)">Response OK</button>
-                        <button @click="cmdResponse(c, 500)">Failed</button>
-                    </div>
-                </ul>
-            </div>
-            
+                            <span>Messages sent {{ sentMessages }}</span>
+                        </div>
+                    </td>
+                    <td>
+                        <div>
+                            <h4>
+                                Commands <a href="#" @click="clearCommands()">(clear)</a>
+                            </h4>
+                            <ul v-for="c in commands">
+                                <strong>{{ c.method }}</strong> {{ c.rid }}
+                                <pre>{{ c.payload | pretty }}</pre>
+                                <div v-if="c.dirty===false">
+                                    <textarea cols="50" rows="3" v-model="c.response"></textarea>
+                                    <button @click="cmdResponse(c, 200)">Response OK</button>
+                                    <button @click="cmdResponse(c, 500)">Failed</button>
+                                </div>
+                            </ul>
+                        </div>
+                    </td>
+                </tr>
+            </table>
         </div>
     </div>
     <script src="index.js" type="module"></script>
     <div class="footer">
         <i>
-            Using <a href="https://github.com/eclipse/paho.mqtt.javascript">paho.mqtt.javascript</a> to communicate with Azure IoT hub. 
-            <a href="http://github.com/ridomin/iothub-webclient">source 0.0.01</a> by <a href="https://twitter.com/ridomin">ridomin</a>
+            Using <a href="https://github.com/eclipse/paho.mqtt.javascript">paho.mqtt.javascript</a> to communicate with
+            Azure IoT hub.
+            <a href="http://github.com/ridomin/iothub-webclient">source 0.0.02</a> by <a
+                href="https://twitter.com/ridomin">ridomin</a>
         </i>
     </div>
-<!-- Global site tag (gtag.js) - Google Analytics -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=UA-66818411-7"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-66818411-7"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
 
-  gtag('config', 'UA-66818411-7');
-</script>
+        gtag('config', 'UA-66818411-7');
+    </script>
 </body>
+
 </html>

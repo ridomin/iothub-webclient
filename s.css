@@ -6,3 +6,12 @@ label {
   width: 140px;
   text-align: right
 }​
+table,tr,td {
+  padding: 5px;
+  margin: 5px;
+  vertical-align: top;
+}
+.footer {
+  padding:20px;  
+  width: 100%;
+}
