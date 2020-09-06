@@ -12,7 +12,7 @@
     "mqtt"
   ],
   "author": "ridomin",
-  "license": "ISC",
+  "license": "MIT",
   "devDependencies": {
     "@types/paho-mqtt": "^1.0.4",
     "serve": "^11.3.2",
