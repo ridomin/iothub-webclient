@@ -17,10 +17,7 @@ This app uses the [Eclipse Paho JavaScript Client](https://www.eclipse.org/paho/
 ```js
 import { AzIoTHubClient, ackPayload } from './AzIoTHubClient.js'
 
-const client = new HubClient(host,
-  this.connectionInfo.deviceId,
-  this.connectionInfo.deviceKey,
-  this.connectionInfo.modelId)
+const client = new AzIoTHubClient(host, deviceId, deviceKey, modelId)
 
 client.setDirectMehodCallback((method, payload, rid) => {
   const response = JSON.stringigy({ customResponse: 'cmdResponsePayload' })
@@ -51,6 +48,10 @@ Azure IoT Hub uses an HMAC signature to produce a SaS token used to authenticate
 - Receive command request
 - Reply commands with custom responses
 - .d.ts typings
+
+## Issues
+
+- Connection failures are not shown in the UI
 
 ## Roadmap
 
