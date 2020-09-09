@@ -49,10 +49,6 @@ Azure IoT Hub uses an HMAC signature to produce a SaS token used to authenticate
 - Reply commands with custom responses
 - .d.ts typings
 
-## Issues
-
-- https://github.com/ridomin/iothub-webclient/issues/22
-
 ## Roadmap
 
 - DPS client over MQTT
