@@ -123,6 +123,7 @@ const createApp = () => {
         const updateResult = await client.updateTwin(JSON.stringify(payload))
         if (updateResult === 204) {
           await this.readTwin()
+          this.desiredCalls = []
         } else console.log('error updating ack' + updateResult)
       },
       clearUpdates () {
