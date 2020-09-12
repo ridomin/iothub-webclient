@@ -85,7 +85,7 @@ export class AzIoTHubClient {
    * @description Connects to Azure IoT Hub using MQTT over websockets
    */
   async connect () {
-    let userName = `${this.host}/${this.deviceId}/?api-version=2020-05-31-preview`
+    let userName = `${this.host}/${this.deviceId}/?api-version=2020-09-30`
     if (this.modelId) userName += `&model-id=${this.modelId}`
     const password = await generateSasToken(`${this.host}/devices/${this.deviceId}`, this.key, null, 60)
     return new Promise((resolve, reject) => {
