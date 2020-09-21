@@ -20,7 +20,7 @@ import { AzIoTHubClient, ackPayload } from './AzIoTHubClient.js'
 const client = new AzIoTHubClient(host, deviceId, deviceKey, modelId)
 
 client.setDirectMehodCallback((method, payload, rid) => {
-  const response = JSON.stringigy({ customResponse: 'cmdResponsePayload' })
+  const response = JSON.stringify({ customResponse: 'cmdResponsePayload' })
   client.commandResponse(method, response, rid, 200)
 })
 
@@ -29,6 +29,7 @@ client.setDesiredPropertyCallback((desired) => {
   const payload = ackPayload(dco, status, dco.$version)
   const updateResult = await client.updateTwin(JSON.stringify(payload))
 })
+
 await client.connect()
 const twin = await client.getTwin()
 await client.updateTwin('{}')
@@ -41,12 +42,12 @@ Azure IoT Hub uses an HMAC signature to produce a SaS token used to authenticate
 ## Features
 
 - Connect using the PnP Convention (announce `model-id`) with SasKeys
-- Read Device Twin (reported and desired properties)
-- Update reported properties
-- Receive desired properties
-- ACK desired properties updates following the PnP convention
-- Receive command request
-- Reply commands with custom responses
+- Read Device Twin reported and desired properties (D2C)
+- Update reported properties (D2C)
+- Receive desired properties updates (C2D)
+- ACK desired properties updates following the PnP convention (D2C)
+- Receive command request (C2D)
+- Reply commands with custom responses (D2C)
 - .d.ts typings
 
 ## Roadmap
