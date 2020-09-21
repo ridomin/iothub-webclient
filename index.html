@@ -56,18 +56,17 @@
                     <td>
                         <div>
                             <h4>Reported Properties</h4>
-                            <pre>{{ reportedJson | pretty }}</pre>
                             <div>
                                 <textarea cols="30" rows="5" v-model="reportedPropJson"></textarea>
                             </div>
                             <button @click="reportProp()">Report Prop</button>
                             <button @click="readTwin()">Refresh Twin</button>
+                            <pre>{{ reportedJson | pretty }}</pre>
                         </div>
                     </td>
                     <td>
                         <div>
                             <h4>Desired Properties</h4>
-                            <pre>{{ desiredJson | pretty }}</pre>
                             <h5>Updates
                                 <a href="#" @click="clearUpdates()">(clear)</a>
                             </h5>
@@ -76,6 +75,7 @@
                                 <button @click="ackDesired(dc, 200)">ACK OK</button>
                                 <button @click="ackDesired(dc, 500)">ACK Fail</button>
                             </ul>
+                            <pre>{{ desiredJson | pretty }}</pre>
                         </div>
                     </td>
                    
