@@ -132,7 +132,7 @@ const createApp = () => {
     },
     computed: {
       connectionString () {
-        return `HostName=${this.connectionInfo.hubName}.azure-devices.net;DeviceId=${this.connectionInfo.deviceId};ShareddAccessKey=${this.connectionInfo.deviceKey}`
+        return `HostName=${this.connectionInfo.hubName}.azure-devices.net;DeviceId=${this.connectionInfo.deviceId};SharedAccessKey=${this.connectionInfo.deviceKey}`
       }
     },
     filters: {
