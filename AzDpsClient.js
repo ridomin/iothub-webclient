@@ -50,7 +50,7 @@ export class AzDpsClient {
 
   async connect () {
     const userName = `${this.scopeId}/registrations/${this.deviceId}/api-version=2019-03-31`
-    const password = await generateSasToken(`${this.scopeId}/registrations/${this.deviceId}`, this.key, null, 60)
+    const password = await generateSasToken(`${this.scopeId}/registrations/${this.deviceId}`, this.key, 'registration', 60)
 
     return new Promise((resolve, reject) => {
       const willMsg = new Paho.MQTT.Message('')
@@ -70,7 +70,7 @@ export class AzDpsClient {
         useSSL: true,
         userName: userName,
         timeout: 120,
-        cleanSession: true,
+        cleanSession: false,
         invocationContext: {},
         keepAliveInterval: 120,
         willMessage: willMsg,
