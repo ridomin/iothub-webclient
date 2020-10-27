@@ -1,3 +1,4 @@
+import { AzDpsClient } from './AzDpsClient.js'
 import { AzIoTHubClient, ackPayload } from './AzIoTHubClient.js'
 
 const createApp = () => {
@@ -11,6 +12,7 @@ const createApp = () => {
       saveConfig: true,
       /** @type {ConnectionInfo} */
       connectionInfo: {
+        scopeId: '',
         hubName: '',
         deviceId: '',
         deviceKey: '',
@@ -32,6 +34,7 @@ const createApp = () => {
       /** @type { ConnectionInfo } connInfo */
       const connInfo = JSON.parse(window.localStorage.getItem('connectionInfo') || '{}')
       if (connInfo.hubName) {
+        this.connectionInfo.scopeId = connInfo.scopeId
         this.connectionInfo.hubName = connInfo.hubName
         this.connectionInfo.deviceId = connInfo.deviceId
         this.connectionInfo.deviceKey = connInfo.deviceKey
@@ -39,11 +42,19 @@ const createApp = () => {
       }
     },
     methods: {
+      async register () {
+        const dpsClient = new AzDpsClient('0ne000DE9FB', 'testdps', 'XkOnETvUflBRp09wMjgvJ5Vt5HWXFvAbWA0nYOuKTU4=')
+        await dpsClient.connect()
+        const result = await dpsClient.register()
+        console.log(result)
+      },
       async connect () {
+        await this.register()
         if (this.saveConfig) {
           window.localStorage.setItem('connectionInfo',
             JSON.stringify(
               {
+                scopeId: this.connectionInfo.scopeId,
                 hubName: this.connectionInfo.hubName,
                 deviceId: this.connectionInfo.deviceId,
                 deviceKey: this.connectionInfo.deviceKey,

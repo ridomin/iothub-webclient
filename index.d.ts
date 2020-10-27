@@ -1,4 +1,5 @@
 type ConnectionInfo = {
+    scopeId: string,
     deviceId: string,
     hubName: string,
     deviceKey: string,
