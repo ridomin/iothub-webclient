@@ -29,9 +29,23 @@ const createApp = () => {
       isTelemetryRunning: false
     },
     created () {
+      const qs = decodeURIComponent(window.location.search)
+      const csqs = new URLSearchParams(qs)
+      const hubName = csqs.get('HostName')
+      const deviceId = csqs.get('DeviceId')
+      const deviceKey = csqs.get('SharedAccessKey')
+      const modelId = csqs.get('ModelId')
+
       /** @type { ConnectionInfo } connInfo */
       const connInfo = JSON.parse(window.localStorage.getItem('connectionInfo') || '{}')
-      if (connInfo.hubName) {
+
+      if (hubName) {
+        this.connectionInfo.hubName = hubName
+        this.connectionInfo.deviceId = deviceId
+        this.connectionInfo.deviceKey = deviceKey
+        this.connectionInfo.modelId = modelId
+        console.log('connfrom csqs', this.connectionInfo)
+      } else if (connInfo.hubName) {
         this.connectionInfo.hubName = connInfo.hubName
         this.connectionInfo.deviceId = connInfo.deviceId
         this.connectionInfo.deviceKey = connInfo.deviceKey
@@ -50,7 +64,10 @@ const createApp = () => {
                 modelId: this.connectionInfo.modelId
               }))
         }
-        const host = `${this.connectionInfo.hubName}.azure-devices.net`
+        let host = this.connectionInfo.hubName
+        if (host.indexOf('.azure-devices.net') === -1) {
+          host += '.azure-devices.net'
+        }
         client = new AzIoTHubClient(host,
           this.connectionInfo.deviceId,
           this.connectionInfo.deviceKey,
