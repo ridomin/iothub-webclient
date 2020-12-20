@@ -44,7 +44,6 @@ const createApp = () => {
         this.connectionInfo.deviceId = deviceId
         this.connectionInfo.deviceKey = deviceKey
         this.connectionInfo.modelId = modelId
-        console.log('connfrom csqs', this.connectionInfo)
       } else if (connInfo.hubName) {
         this.connectionInfo.hubName = connInfo.hubName
         this.connectionInfo.deviceId = connInfo.deviceId
