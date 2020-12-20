@@ -63,13 +63,13 @@ export class AzIoTHubClient {
      * @param {string} payload
      * @param {number} rid
      */
-    this.c2dCallback = (method, payload, rid) => {}
+    this.c2dCallback = (method, payload, rid) => { }
 
     /**
      * @description Callback for desired properties upadtes
      * @param {string} desired
      */
-    this.desiredPropCallback = (desired) => {}
+    this.desiredPropCallback = (desired) => { }
     /**
      * @param {any} err
      */
@@ -77,8 +77,8 @@ export class AzIoTHubClient {
     /**
      * @param {any} twin
      */
-    this._onReadTwinCompleted = (twin) => {}
-    this._onUpdateTwinCompleted = () => {}
+    this._onReadTwinCompleted = (twin) => { }
+    this._onUpdateTwinCompleted = () => { }
   }
 
   /**
@@ -102,8 +102,8 @@ export class AzIoTHubClient {
       this.client.onMessageArrived = (/** @type {Paho.MQTT.Message} */ m) => {
         const destinationName = m.destinationName
         const payloadString = m.payloadString
-        console.log('On Msg Arrived to ' + destinationName)
-        console.log(payloadString)
+        // console.log('On Msg Arrived to ' + destinationName)
+        // console.log(payloadString)
         if (destinationName === '$iothub/twin/res/200/?$rid=' + this.rid) {
           this._onReadTwinCompleted(payloadString)
         }
@@ -154,7 +154,7 @@ export class AzIoTHubClient {
             onFailure: (err) => { throw err },
             timeout: 120
           })
-          resolve()
+          resolve(this.deviceId)
         }
       })
     })
@@ -165,7 +165,7 @@ export class AzIoTHubClient {
    */
   getTwin () {
     this.rid = Date.now()
-    console.log(this.rid)
+    // console.log(this.rid)
     const readTwinMessage = new Paho.MQTT.Message('')
     readTwinMessage.destinationName = DEVICE_TWIN_GET_TOPIC + this.rid
     this.client.send(readTwinMessage)
@@ -184,7 +184,7 @@ export class AzIoTHubClient {
    */
   updateTwin (reportedProperties) {
     this.rid = Date.now()
-    console.log(this.rid)
+    // console.log(this.rid)
     const reportedTwinMessage = new Paho.MQTT.Message(reportedProperties)
     reportedTwinMessage.destinationName = DEVICE_TWIN_PUBLISH_TOPIC + this.rid
     this.client.send(reportedTwinMessage)
@@ -237,14 +237,18 @@ export /**
  * @param {number} av
  */
 const ackPayload = (propValues, ac, av) => {
-  const ack = (ac, av, value, __t) => { return { __t, ac, av, value } }
+  const isObject = o => o === Object(o)
   const payload = {}
   Object.keys(propValues).filter(k => k !== '$version').forEach(k => {
-    if (propValues[k].__t === 'c') {
-      delete propValues[k].__t
-      payload[k] = ack(ac, av, propValues[k], 'c')
+    const value = propValues[k]
+    if (isObject(value)) {
+      Object.keys(value).filter(k => k !== '__t').forEach(p => {
+        const desiredValue = value[p]
+        propValues[k][p] = { ac, av, value: desiredValue }
+        payload[k] = propValues[k]
+      })
     } else {
-      payload[k] = ack(ac, av, propValues[k])
+      payload[k] = { ac, av, value }
     }
   })
   return payload
