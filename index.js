@@ -9,6 +9,8 @@ const createApp = () => {
     el: '#app',
     data: {
       saveConfig: true,
+      viewDpsForm: false,
+      disableDeviceKey: false,
       /** @type {ConnectionInfo} */
       connectionInfo: {
         hubName: '',
@@ -142,8 +144,15 @@ const createApp = () => {
           this.desiredCalls = []
         } else console.log('error updating ack' + updateResult)
       },
+      showDpsForm () {
+        this.disableDeviceKey = false
+        this.viewDpsForm = !this.viewDpsForm
+      },
       clearUpdates () {
         this.desiredCalls = []
+      },
+      focusMasterKey () {
+        this.disableDeviceKey = true
       }
     },
     computed: {
