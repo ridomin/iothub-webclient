@@ -15,21 +15,34 @@
     <div id="app">
         <h1>Azure IoT Hub Web Client</h1>
         <h3>
-            <div @click="showDpsForm()" class="menuItem">
-                <span v-show="!connectionInfo.connected && viewDpsForm">DPS Credentials</span>
-                <span v-show="!connectionInfo.connected && !viewDpsForm">Hub Credentials</span>
+            <div @click="showDpsForm()">
+                <span v-show="!connectionInfo.connected">Credentials</span>
+                <a v-show="!viewDpsForm" href="#">Use DPS/Central</a>
+                <a v-show="viewDpsForm" href="#">Use Hub Connection String</a>
             <div>
         </h3>
+        <div v-show="!connectionInfo.connected">
+            <p>
+                <label for="inputModelId">Model Id</label>
+                <input type="text" id="inputModelId" size="55" v-model='connectionInfo.modelId'>
+            </p>
+            <p>
+                <label for="inputDeviceId">DeviceId</label>
+                <input type="text" id="inputDeviceId" size="55" 
+                        v-model='connectionInfo.deviceId'
+                        @change='updateDeviceKey()'>
+            </p>
+        </div>
         <div v-show="viewDpsForm">
-           
             <p>
                 <label for="input Id Scope">IdScope</label>
                 <input type="text" id="inputIdScope" size="55" v-model='connectionInfo.scopeId' />
             </p>
-
             <p>
-                <label for="inputDeviceId">DeviceId</label>
-                <input type="text" id="inputDeviceId" size="55" v-model='connectionInfo.deviceId'>
+                <label for="inputMasterKey">MasterKey</label>
+                <input type="text" id="inputMasterKey" size="55" 
+                @change='updateDeviceKey()'
+                v-model='connectionInfo.masterKey'>
             </p>
             <p>
                 <label for="inputDeviceKey">DeviceKey</label>
@@ -37,17 +50,6 @@
                 :disabled='disableDeviceKey'
                 v-model='connectionInfo.deviceKey'>
             </p>
-            <p>
-                <label for="inputMasterKey">MasterKey</label>
-                <input type="text" id="inputMasterKey" size="55" 
-                @focus='focusMasterKey()'
-                v-model='connectionInfo.masterKey'>
-            </p>
-            <p>
-                <label for="inputModelId">Model Id</label>
-                <input type="text" id="inputModelId" size="55" v-model='connectionInfo.modelId'>
-            </p>
-
             <div class="right">
                 <input type="button" id="btnDPS" value="Provision" @click="provision()">
             </div>
@@ -58,18 +60,9 @@
                 <label for="inputHostName">Hub Name</label>
                 <input type="text" id="inputHostName" size="55" v-model='connectionInfo.hubName' />
             </p>
-
-            <p>
-                <label for="inputDeviceId">DeviceId</label>
-                <input type="text" id="inputDeviceId" size="55" v-model='connectionInfo.deviceId'>
-            </p>
             <p>
                 <label for="inputDeviceKey">DeviceKey</label>
                 <input type="text" id="inputDeviceKey" size="55" v-model='connectionInfo.deviceKey'>
-            </p>
-            <p>
-                <label for="inputModelId">Model Id</label>
-                <input type="text" id="inputModelId" size="55" v-model='connectionInfo.modelId'>
             </p>
 
             <div class="right">

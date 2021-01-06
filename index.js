@@ -171,8 +171,9 @@ const createApp = () => {
       clearUpdates () {
         this.desiredCalls = []
       },
-      focusMasterKey () {
+      async updateDeviceKey () {
         this.disableDeviceKey = true
+        this.connectionInfo.deviceKey = await createHmac(this.connectionInfo.masterKey, this.connectionInfo.deviceId)
       }
     },
     computed: {
