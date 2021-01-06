@@ -11,6 +11,9 @@ table,tr,td {
   margin: 5px;
   vertical-align: top;
 }
+.right {
+  padding-left: 100px;
+}
 .footer {
   padding:20px;  
   width: 100%;
