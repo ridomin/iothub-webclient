@@ -18,7 +18,7 @@ const createApp = () => {
         hubName: '',
         deviceId: '',
         deviceKey: '',
-        modelId: 'dtmi:Advantech:EPC_U2117;2',
+        modelId: 'dtmi:com:example:Thermostat;1',
         status: 'Disconnected',
         connected: false
       },

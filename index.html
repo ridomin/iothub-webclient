@@ -15,10 +15,10 @@
     <div id="app">
         <h1>Azure IoT Hub Web Client</h1>
         <h3>
-            <div @click="showDpsForm()">
-                <span v-show="!connectionInfo.connected">Credentials</span>
-                <a v-show="!viewDpsForm" href="#">Use DPS/Central</a>
-                <a v-show="viewDpsForm" href="#">Use Hub Connection String</a>
+            <span v-show="!connectionInfo.connected">Credentials</span>
+            <div v-show="!connectionInfo.connected" >
+                <a v-show="!viewDpsForm" @click="showDpsForm()" href="#">Use DPS/Central</a>
+                <a v-show="viewDpsForm" @click="showDpsForm()" href="#">Use Hub Connection String</a>
             <div>
         </h3>
         <div v-show="!connectionInfo.connected">
@@ -148,7 +148,7 @@
             Using <a href="https://github.com/eclipse/paho.mqtt.javascript">paho.mqtt.javascript</a> to communicate with
             Azure IoT hub.
 
-            <a href="http://github.com/ridomin/iothub-webclient">source 0.0.034</a> by <a
+            <a href="http://github.com/ridomin/iothub-webclient">source 0.0.035</a> by <a
                 href="https://twitter.com/ridomin">ridomin</a>
         </i>
     </div>
