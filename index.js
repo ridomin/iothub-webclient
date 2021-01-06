@@ -10,6 +10,8 @@ const createApp = () => {
     el: '#app',
     data: {
       saveConfig: true,
+      viewDpsForm: false,
+      disableDeviceKey: false,
       /** @type {ConnectionInfo} */
       connectionInfo: {
         scopeId: '',
@@ -31,10 +33,27 @@ const createApp = () => {
       isTelemetryRunning: false
     },
     created () {
+      const qs = decodeURIComponent(window.location.search)
+      const csqs = new URLSearchParams(qs)
+      const hubName = csqs.get('HostName')
+      const deviceId = csqs.get('DeviceId')
+      const deviceKey = csqs.get('SharedAccessKey')
+      const modelId = csqs.get('ModelId')
+
       /** @type { ConnectionInfo } connInfo */
       const connInfo = JSON.parse(window.localStorage.getItem('connectionInfo') || '{}')
+<<<<<<< HEAD
       if (connInfo.hubName) {
         this.connectionInfo.scopeId = connInfo.scopeId
+=======
+
+      if (hubName) {
+        this.connectionInfo.hubName = hubName
+        this.connectionInfo.deviceId = deviceId
+        this.connectionInfo.deviceKey = deviceKey
+        this.connectionInfo.modelId = modelId
+      } else if (connInfo.hubName) {
+>>>>>>> 8710b71efcb59d989ca0b690a52c1b0c9b8abca5
         this.connectionInfo.hubName = connInfo.hubName
         this.connectionInfo.deviceId = connInfo.deviceId
         this.connectionInfo.deviceKey = connInfo.deviceKey
@@ -61,7 +80,10 @@ const createApp = () => {
                 modelId: this.connectionInfo.modelId
               }))
         }
-        const host = `${this.connectionInfo.hubName}.azure-devices.net`
+        let host = this.connectionInfo.hubName
+        if (host.indexOf('.azure-devices.net') === -1) {
+          host += '.azure-devices.net'
+        }
         client = new AzIoTHubClient(host,
           this.connectionInfo.deviceId,
           this.connectionInfo.deviceKey,
@@ -137,8 +159,15 @@ const createApp = () => {
           this.desiredCalls = []
         } else console.log('error updating ack' + updateResult)
       },
+      showDpsForm () {
+        this.disableDeviceKey = false
+        this.viewDpsForm = !this.viewDpsForm
+      },
       clearUpdates () {
         this.desiredCalls = []
+      },
+      focusMasterKey () {
+        this.disableDeviceKey = true
       }
     },
     computed: {
