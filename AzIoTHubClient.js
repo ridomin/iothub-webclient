@@ -5,6 +5,7 @@ const DEVICE_TWIN_PUBLISH_TOPIC = '$iothub/twin/PATCH/properties/reported/?$rid=
 const DIRECT_METHOD_TOPIC = '$iothub/methods/POST/#'
 const DEVICE_TWIN_DESIRED_PROP_RES_TOPIC = '$iothub/twin/PATCH/properties/desired/#'
 const DIRECT_METHOD_RESPONSE_TOPIC = '$iothub/methods/res/{status}/?$rid='
+
 /**
  *
  * @param {String} key

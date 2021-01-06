@@ -1,3 +1,4 @@
+import { AzDpsClient, createHmac } from './AzDpsClient.js'
 import { AzIoTHubClient, ackPayload } from './AzIoTHubClient.js'
 
 const createApp = () => {
@@ -9,12 +10,15 @@ const createApp = () => {
     el: '#app',
     data: {
       saveConfig: true,
+      viewDpsForm: false,
+      disableDeviceKey: false,
       /** @type {ConnectionInfo} */
       connectionInfo: {
+        scopeId: '',
         hubName: '',
         deviceId: '',
         deviceKey: '',
-        modelId: 'dtmi:com:example:sampledevice;1',
+        modelId: 'dtmi:com:example:Thermostat;1',
         status: 'Disconnected',
         connected: false
       },
@@ -28,23 +32,21 @@ const createApp = () => {
       sentMessages: 0,
       isTelemetryRunning: false
     },
-    created () {
-      const qs = decodeURIComponent(window.location.search)
-      const csqs = new URLSearchParams(qs)
-      const hubName = csqs.get('HostName')
-      const deviceId = csqs.get('DeviceId')
-      const deviceKey = csqs.get('SharedAccessKey')
-      const modelId = csqs.get('ModelId')
-
+    async created () {
       /** @type { ConnectionInfo } connInfo */
       const connInfo = JSON.parse(window.localStorage.getItem('connectionInfo') || '{}')
 
-      if (hubName) {
-        this.connectionInfo.hubName = hubName
-        this.connectionInfo.deviceId = deviceId
-        this.connectionInfo.deviceKey = deviceKey
-        this.connectionInfo.modelId = modelId
-      } else if (connInfo.hubName) {
+      this.connectionInfo.deviceId = connInfo.deviceId || 'device' + Date.now()
+
+      if (connInfo.scopeId) {
+        this.connectionInfo.scopeId = connInfo.scopeId
+        if (connInfo.masterKey) {
+          this.connectionInfo.masterKey = connInfo.masterKey
+          this.connectionInfo.deviceKey = await createHmac(this.connectionInfo.masterKey, this.connectionInfo.deviceId)
+        }
+      }
+
+      if (connInfo.hubName) {
         this.connectionInfo.hubName = connInfo.hubName
         this.connectionInfo.deviceId = connInfo.deviceId
         this.connectionInfo.deviceKey = connInfo.deviceKey
@@ -52,14 +54,34 @@ const createApp = () => {
       }
     },
     methods: {
+      async provision () {
+        window.localStorage.setItem('connectionInfo',
+            JSON.stringify(
+              {
+                scopeId: this.connectionInfo.scopeId,
+                hubName: this.connectionInfo.hubName,
+                deviceId: this.connectionInfo.deviceId,
+                deviceKey: this.connectionInfo.deviceKey,
+                masterKey: this.connectionInfo.masterKey,
+                modelId: this.connectionInfo.modelId
+              }))
+        const dpsClient = new AzDpsClient(this.connectionInfo.scopeId, this.connectionInfo.deviceId, this.connectionInfo.deviceKey, this.connectionInfo.modelId)
+        const result = await dpsClient.registerDevice()
+        if (result.status === 'assigned') {
+          this.connectionInfo.hubName = result.registrationState.assignedHub
+        }
+        this.viewDpsForm = false
+      },
       async connect () {
         if (this.saveConfig) {
           window.localStorage.setItem('connectionInfo',
             JSON.stringify(
               {
+                scopeId: this.connectionInfo.scopeId,
                 hubName: this.connectionInfo.hubName,
                 deviceId: this.connectionInfo.deviceId,
                 deviceKey: this.connectionInfo.deviceKey,
+                masterKey: this.connectionInfo.masterKey,
                 modelId: this.connectionInfo.modelId
               }))
         }
@@ -142,8 +164,16 @@ const createApp = () => {
           this.desiredCalls = []
         } else console.log('error updating ack' + updateResult)
       },
+      showDpsForm () {
+        this.disableDeviceKey = false
+        this.viewDpsForm = !this.viewDpsForm
+      },
       clearUpdates () {
         this.desiredCalls = []
+      },
+      async updateDeviceKey () {
+        this.disableDeviceKey = true
+        this.connectionInfo.deviceKey = await createHmac(this.connectionInfo.masterKey, this.connectionInfo.deviceId)
       }
     },
     computed: {
