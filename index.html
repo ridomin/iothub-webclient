@@ -14,14 +14,17 @@
 <body>
     <div id="app">
         <h1>Azure IoT Hub Web Client</h1>
-        <h3>Hub Connection Details |
-            <span @click="showDpsForm()">Provision with DPS<span>
-            </h3>
+        <h3>
+            <div @click="showDpsForm()" class="menuItem">
+                <span v-show="!connectionInfo.connected && viewDpsForm">DPS Credentials</span>
+                <span v-show="!connectionInfo.connected && !viewDpsForm">Hub Credentials</span>
+            <div>
+        </h3>
         <div v-show="viewDpsForm">
            
             <p>
-                <label for="inputHostName">IdScope</label>
-                <input type="text" id="inputIdScope" size="55" v-model='connectionInfo.idScope' />
+                <label for="input Id Scope">IdScope</label>
+                <input type="text" id="inputIdScope" size="55" v-model='connectionInfo.scopeId' />
             </p>
 
             <p>
@@ -38,7 +41,7 @@
                 <label for="inputMasterKey">MasterKey</label>
                 <input type="text" id="inputMasterKey" size="55" 
                 @focus='focusMasterKey()'
-                v-model='connectionInfo.MasterKey'>
+                v-model='connectionInfo.masterKey'>
             </p>
             <p>
                 <label for="inputModelId">Model Id</label>
@@ -51,10 +54,6 @@
         </div>
         <div v-show="!connectionInfo.connected && !viewDpsForm">
             
-            <p>
-                <label for="inputScopeId">Hub Name</label>
-                <input type="text" id="inputScopeId" v-model='connectionInfo.scopeId' />
-            </p>
             <p>
                 <label for="inputHostName">Hub Name</label>
                 <input type="text" id="inputHostName" size="55" v-model='connectionInfo.hubName' />

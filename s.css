@@ -25,3 +25,6 @@ table,tr,td {
   position: fixed;
   width: 100%;
 }
+.menuItem {
+  cursor: hand
+}

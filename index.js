@@ -1,4 +1,4 @@
-import { AzDpsClient } from './AzDpsClient.js'
+import { AzDpsClient, createHmac } from './AzDpsClient.js'
 import { AzIoTHubClient, ackPayload } from './AzIoTHubClient.js'
 
 const createApp = () => {
@@ -18,7 +18,7 @@ const createApp = () => {
         hubName: '',
         deviceId: '',
         deviceKey: '',
-        modelId: 'dtmi:com:example:sampledevice;1',
+        modelId: 'dtmi:Advantech:EPC_U2117;2',
         status: 'Disconnected',
         connected: false
       },
@@ -32,28 +32,21 @@ const createApp = () => {
       sentMessages: 0,
       isTelemetryRunning: false
     },
-    created () {
-      const qs = decodeURIComponent(window.location.search)
-      const csqs = new URLSearchParams(qs)
-      const hubName = csqs.get('HostName')
-      const deviceId = csqs.get('DeviceId')
-      const deviceKey = csqs.get('SharedAccessKey')
-      const modelId = csqs.get('ModelId')
-
+    async created () {
       /** @type { ConnectionInfo } connInfo */
       const connInfo = JSON.parse(window.localStorage.getItem('connectionInfo') || '{}')
-<<<<<<< HEAD
-      if (connInfo.hubName) {
-        this.connectionInfo.scopeId = connInfo.scopeId
-=======
 
-      if (hubName) {
-        this.connectionInfo.hubName = hubName
-        this.connectionInfo.deviceId = deviceId
-        this.connectionInfo.deviceKey = deviceKey
-        this.connectionInfo.modelId = modelId
-      } else if (connInfo.hubName) {
->>>>>>> 8710b71efcb59d989ca0b690a52c1b0c9b8abca5
+      this.connectionInfo.deviceId = connInfo.deviceId || 'device' + Date.now()
+
+      if (connInfo.scopeId) {
+        this.connectionInfo.scopeId = connInfo.scopeId
+        if (connInfo.masterKey) {
+          this.connectionInfo.masterKey = connInfo.masterKey
+          this.connectionInfo.deviceKey = await createHmac(this.connectionInfo.masterKey, this.connectionInfo.deviceId)
+        }
+      }
+
+      if (connInfo.hubName) {
         this.connectionInfo.hubName = connInfo.hubName
         this.connectionInfo.deviceId = connInfo.deviceId
         this.connectionInfo.deviceKey = connInfo.deviceKey
@@ -61,14 +54,25 @@ const createApp = () => {
       }
     },
     methods: {
-      async register () {
-        const dpsClient = new AzDpsClient('0ne000DE9FB', 'testdps', 'XkOnETvUflBRp09wMjgvJ5Vt5HWXFvAbWA0nYOuKTU4=')
-        await dpsClient.connect()
-        const result = await dpsClient.register()
-        console.log(result)
+      async provision () {
+        window.localStorage.setItem('connectionInfo',
+            JSON.stringify(
+              {
+                scopeId: this.connectionInfo.scopeId,
+                hubName: this.connectionInfo.hubName,
+                deviceId: this.connectionInfo.deviceId,
+                deviceKey: this.connectionInfo.deviceKey,
+                masterKey: this.connectionInfo.masterKey,
+                modelId: this.connectionInfo.modelId
+              }))
+        const dpsClient = new AzDpsClient(this.connectionInfo.scopeId, this.connectionInfo.deviceId, this.connectionInfo.deviceKey, this.connectionInfo.modelId)
+        const result = await dpsClient.registerDevice()
+        if (result.status === 'assigned') {
+          this.connectionInfo.hubName = result.registrationState.assignedHub
+        }
+        this.viewDpsForm = false
       },
       async connect () {
-        await this.register()
         if (this.saveConfig) {
           window.localStorage.setItem('connectionInfo',
             JSON.stringify(
@@ -77,6 +81,7 @@ const createApp = () => {
                 hubName: this.connectionInfo.hubName,
                 deviceId: this.connectionInfo.deviceId,
                 deviceKey: this.connectionInfo.deviceKey,
+                masterKey: this.connectionInfo.masterKey,
                 modelId: this.connectionInfo.modelId
               }))
         }

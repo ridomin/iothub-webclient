@@ -3,6 +3,7 @@ type ConnectionInfo = {
     deviceId: string,
     hubName: string,
     deviceKey: string,
+    masterKey?: string,
     modelId?: string,
     status: string,
     connected: bool
