@@ -50,8 +50,11 @@
                 :disabled='disableDeviceKey'
                 v-model='connectionInfo.deviceKey'>
             </p>
-            <div class="right">
+            <div class="right" v-show="!runningProvision">
                 <input type="button" id="btnDPS" value="Provision" @click="provision()">
+            </div>
+            <div v-show="runningProvision">
+                <span>Provisioning device ...</span>    
             </div>
         </div>
         <div v-show="!connectionInfo.connected && !viewDpsForm">

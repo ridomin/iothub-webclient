@@ -12,6 +12,7 @@ const createApp = () => {
       saveConfig: true,
       viewDpsForm: false,
       disableDeviceKey: false,
+      runningProvision: false,
       /** @type {ConnectionInfo} */
       connectionInfo: {
         scopeId: '',
@@ -66,9 +67,13 @@ const createApp = () => {
                 modelId: this.connectionInfo.modelId
               }))
         const dpsClient = new AzDpsClient(this.connectionInfo.scopeId, this.connectionInfo.deviceId, this.connectionInfo.deviceKey, this.connectionInfo.modelId)
+        this.runningProvision = true
         const result = await dpsClient.registerDevice()
+        this.runningProvision = false
         if (result.status === 'assigned') {
           this.connectionInfo.hubName = result.registrationState.assignedHub
+        } else {
+          this.connectionInfo.hubName = result.status
         }
         this.viewDpsForm = false
       },
