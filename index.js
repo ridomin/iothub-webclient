@@ -12,11 +12,12 @@ const createApp = () => {
       saveConfig: true,
       viewDpsForm: false,
       disableDeviceKey: false,
+      runningProvision: false,
       /** @type {ConnectionInfo} */
       connectionInfo: {
         scopeId: '',
         hubName: '',
-        deviceId: '',
+        deviceId: 'device' + Date.now(),
         deviceKey: '',
         modelId: 'dtmi:com:example:Thermostat;1',
         status: 'Disconnected',
@@ -36,7 +37,7 @@ const createApp = () => {
       /** @type { ConnectionInfo } connInfo */
       const connInfo = JSON.parse(window.localStorage.getItem('connectionInfo') || '{}')
 
-      this.connectionInfo.deviceId = connInfo.deviceId || 'device' + Date.now()
+      connInfo.deviceId = connInfo.deviceId || 'device' + Date.now()
 
       if (connInfo.scopeId) {
         this.connectionInfo.scopeId = connInfo.scopeId
@@ -66,11 +67,20 @@ const createApp = () => {
                 modelId: this.connectionInfo.modelId
               }))
         const dpsClient = new AzDpsClient(this.connectionInfo.scopeId, this.connectionInfo.deviceId, this.connectionInfo.deviceKey, this.connectionInfo.modelId)
+        this.runningProvision = true
         const result = await dpsClient.registerDevice()
+        this.runningProvision = false
         if (result.status === 'assigned') {
           this.connectionInfo.hubName = result.registrationState.assignedHub
+        } else {
+          console.log(result)
+          this.connectionInfo.hubName = result.status
         }
         this.viewDpsForm = false
+      },
+      async refreshDeviceId() {
+        this.connectionInfo.deviceId = 'device' + Date.now()
+        await this.updateDeviceKey()
       },
       async connect () {
         if (this.saveConfig) {

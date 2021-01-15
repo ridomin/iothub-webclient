@@ -31,6 +31,14 @@
                 <input type="text" id="inputDeviceId" size="55" 
                         v-model='connectionInfo.deviceId'
                         @change='updateDeviceKey()'>
+
+                <a v-show="viewDpsForm" href="#" @click="refreshDeviceId()">refresh</a>
+            </p>
+            <p>
+                <label for="inputDeviceKey">DeviceKey</label>
+                <input type="text" id="inputDeviceKey" size="55" 
+                :disabled='disableDeviceKey'
+                v-model='connectionInfo.deviceKey'>
             </p>
         </div>
         <div v-show="viewDpsForm">
@@ -44,14 +52,12 @@
                 @change='updateDeviceKey()'
                 v-model='connectionInfo.masterKey'>
             </p>
-            <p>
-                <label for="inputDeviceKey">DeviceKey</label>
-                <input type="text" id="inputDeviceKey" size="55" 
-                :disabled='disableDeviceKey'
-                v-model='connectionInfo.deviceKey'>
-            </p>
-            <div class="right">
+
+            <div class="right" v-show="!runningProvision">
                 <input type="button" id="btnDPS" value="Provision" @click="provision()">
+            </div>
+            <div v-show="runningProvision">
+                <span>Provisioning device ...</span>    
             </div>
         </div>
         <div v-show="!connectionInfo.connected && !viewDpsForm">
@@ -59,10 +65,6 @@
             <p>
                 <label for="inputHostName">Hub Name</label>
                 <input type="text" id="inputHostName" size="55" v-model='connectionInfo.hubName' />
-            </p>
-            <p>
-                <label for="inputDeviceKey">DeviceKey</label>
-                <input type="text" id="inputDeviceKey" size="55" v-model='connectionInfo.deviceKey'>
             </p>
 
             <div class="right">
@@ -148,7 +150,7 @@
             Using <a href="https://github.com/eclipse/paho.mqtt.javascript">paho.mqtt.javascript</a> to communicate with
             Azure IoT hub.
 
-            <a href="http://github.com/ridomin/iothub-webclient">source 0.0.035</a> by <a
+            <a href="http://github.com/ridomin/iothub-webclient">source 0.0.036</a> by <a
                 href="https://twitter.com/ridomin">ridomin</a>
         </i>
     </div>
