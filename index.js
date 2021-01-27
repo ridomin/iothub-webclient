@@ -182,8 +182,10 @@ const createApp = () => {
         this.desiredCalls = []
       },
       async updateDeviceKey () {
-        this.disableDeviceKey = true
-        this.connectionInfo.deviceKey = await createHmac(this.connectionInfo.masterKey, this.connectionInfo.deviceId)
+        if (this.viewDpsForm) {
+          this.disableDeviceKey = true
+          this.connectionInfo.deviceKey = await createHmac(this.connectionInfo.masterKey, this.connectionInfo.deviceId)
+        }
       }
     },
     computed: {
