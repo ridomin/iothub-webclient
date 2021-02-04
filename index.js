@@ -183,14 +183,22 @@ const createApp = () => {
       },
       async updateDeviceKey () {
         if (this.viewDpsForm) {
-          this.disableDeviceKey = true
-          this.connectionInfo.deviceKey = await createHmac(this.connectionInfo.masterKey, this.connectionInfo.deviceId)
+          if (this.connectionInfo.masterKey.length>0) {
+            this.disableDeviceKey = true
+            this.connectionInfo.deviceKey = await createHmac(this.connectionInfo.masterKey, this.connectionInfo.deviceId)
+          } else {
+            this.disableDeviceKey = false
+          }
         }
       }
     },
     computed: {
       connectionString () {
-        return `HostName=${this.connectionInfo.hubName}.azure-devices.net;DeviceId=${this.connectionInfo.deviceId};SharedAccessKey=${this.connectionInfo.deviceKey}`
+        let host = this.connectionInfo.hubName
+        if (host.indexOf('.azure-devices.net') === -1) {
+          host += '.azure-devices.net'
+        }
+        return `HostName=${host};DeviceId=${this.connectionInfo.deviceId};SharedAccessKey=${this.connectionInfo.deviceKey}`
       }
     },
     filters: {
