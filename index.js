@@ -183,8 +183,12 @@ const createApp = () => {
       },
       async updateDeviceKey () {
         if (this.viewDpsForm) {
-          this.disableDeviceKey = true
-          this.connectionInfo.deviceKey = await createHmac(this.connectionInfo.masterKey, this.connectionInfo.deviceId)
+          if (this.connectionInfo.masterKey.length>0) {
+            this.disableDeviceKey = true
+            this.connectionInfo.deviceKey = await createHmac(this.connectionInfo.masterKey, this.connectionInfo.deviceId)
+          } else {
+            this.disableDeviceKey = false
+          }
         }
       }
     },
