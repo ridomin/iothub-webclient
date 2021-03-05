@@ -243,8 +243,7 @@ const ackPayload = (propValues, ac, av) => {
   const payload = {}
   Object.keys(propValues).filter(k => k !== '$version').forEach(k => {
     const value = propValues[k]
-    const compFound = isComponent(value)
-    if (compFound) {
+    if (isComponent(value)) {
       delete value.__t
       payload[k] = { __t: 'c', ac, av, value }
     } else {
