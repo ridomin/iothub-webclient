@@ -3,7 +3,9 @@
   "version": "1.0.0",
   "description": "Web application to connect to Azure IoT Hub from the browser",
   "repository": "https://github.com/ridomin/iothub-webclient",
+  "type": "module",
   "scripts": {
+    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
     "start": "node node_modules/serve/bin/serve.js .",
     "build": "rm -r -f app && mkdir app && cp index.* app/ && cp s.css app && cp Az*.js app && cp *.ico app && cp -R lib/ app/"
   },
@@ -14,14 +16,18 @@
   "author": "ridomin",
   "license": "MIT",
   "devDependencies": {
+    "@types/jest": "^26.0.20",
     "@types/paho-mqtt": "^1.0.4",
+    "jest": "^26.6.3",
     "serve": "^11.3.2",
     "standard": "^14.3.4"
   },
   "standard": {
     "globals": [
       "Paho",
-      "Vue"
+      "Vue",
+      "test",
+      "expect"
     ],
     "ignore": [
       "lib/**",
