@@ -245,7 +245,14 @@ const ackPayload = (propValues, ac, av) => {
     const value = propValues[k]
     if (isComponent(value)) {
       delete value.__t
-      payload[k] = { __t: 'c', ac, av, value }
+      payload[k] = { __t: 'c', ac, av }
+      if (isObject(value)) {
+        Object.keys(value).forEach(v => {
+          payload[k][v] =  value[v]
+        })
+      } else {
+        payload[k] = { __t: 'c', ac, av, value }
+      }
     } else {
       payload[k] = { ac, av, value }
     }
