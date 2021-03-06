@@ -239,15 +239,20 @@ export /**
  */
 const ackPayload = (propValues, ac, av) => {
   const isObject = o => o === Object(o)
+  const isComponent = o => isObject(o) && (Object.keys(o).filter(k => k === '__t').length === 1)
   const payload = {}
   Object.keys(propValues).filter(k => k !== '$version').forEach(k => {
     const value = propValues[k]
-    if (isObject(value)) {
-      Object.keys(value).filter(k => k !== '__t').forEach(p => {
-        const desiredValue = value[p]
-        propValues[k][p] = { ac, av, value: desiredValue }
-        payload[k] = propValues[k]
-      })
+    if (isComponent(value)) {
+      delete value.__t
+      payload[k] = { __t: 'c', ac, av }
+      if (isObject(value)) {
+        Object.keys(value).forEach(v => {
+          payload[k][v] =  value[v]
+        })
+      } else {
+        payload[k] = { __t: 'c', ac, av, value }
+      }
     } else {
       payload[k] = { ac, av, value }
     }
