@@ -143,3 +143,51 @@ test('complexObj2 in comp', () => {
       }
     })
 })
+
+test('2singleProp at root', () => {
+  const payload = {
+    prop1: 1,
+    prop2: '2'
+  }
+  const ack = ackPayload(payload, 200, 1)
+  expect(ack).toStrictEqual(
+    {
+      prop1: {
+        ac: 200,
+        av: 1,
+        value: 1
+      },
+      prop2: {
+        ac: 200,
+        av: 1,
+        value: '2'
+      }
+    })
+})
+
+test('2singleProp at root and comp', () => {
+  const payload = {
+    prop1: 1,
+    MyComp: {
+      __t: 'c',
+      prop2: '2'
+    }
+  }
+  const ack = ackPayload(payload, 200, 1)
+  expect(ack).toStrictEqual(
+    {
+      prop1: {
+        ac: 200,
+        av: 1,
+        value: 1
+      },
+      MyComp: {
+        __t: 'c',
+        prop2: {
+          ac: 200,
+          av: 1,
+          value: '2'
+        }
+      }
+    })
+})
