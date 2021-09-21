@@ -42,6 +42,12 @@ async function generateSasToken (resourceUri, signingKey, policyName, expiresInM
   return token
 }
 
+async function generatePassword(hostname, deviceId, sharedKey, sa_at, expires) {
+  const toSign = `${hostname}\n${deviceId}\n\n${sa_at}\n${expires}\n`
+  const hmac = await createHmac(sharedKey, toSign)
+  return hmac
+}
+
 export class AzIoTHubClient {
   /**
    * @param {string} host
@@ -86,9 +92,13 @@ export class AzIoTHubClient {
    * @description Connects to Azure IoT Hub using MQTT over websockets
    */
   async connect () {
-    let userName = `${this.host}/${this.deviceId}/?api-version=2020-05-31-preview`
-    if (this.modelId) userName += `&model-id=${this.modelId}`
-    const password = await generateSasToken(`${this.host}/devices/${this.deviceId}`, this.key, null, 60)
+    const expiresInMins = 60
+    const now = Math.ceil(Date.now() / 1000)
+    let expires =  Math.ceil(now + expiresInMins * 60)
+
+    let userName = `av=2021-06-30-preview&h=${this.host}&did=${this.deviceId}&am=SASb64&se=${expires}&sa=${now}`
+    // if (this.modelId) userName += `&dtmi=${this.modelId}`
+    const password = await generatePassword(this.host,this.deviceId,this.key, now, expires)
     return new Promise((resolve, reject) => {
       this.client.onConnectionLost = (err) => {
         console.log(err)
@@ -131,6 +141,7 @@ export class AzIoTHubClient {
         keepAliveInterval: 120,
         willMessage: willMsg,
         password: password,
+        mqttVersion: 3,
         onSuccess: () => {
           this.connected = true
           console.log('Connected !!')
