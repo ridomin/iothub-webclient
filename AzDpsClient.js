@@ -1,5 +1,5 @@
-const REGISTRATION_TOPIC = '$dps/registrations/res/#'
-const REGISTER_TOPIC = '$dps/registrations/PUT/iotdps-register/?$rid='
+// const REGISTRATION_TOPIC = '$dps/registrations/res/#'
+// const REGISTER_TOPIC = '$dps/registrations/PUT/iotdps-register/?$rid='
 
 /**
  *
@@ -26,7 +26,7 @@ export class AzDpsClient {
     this.deviceKey = deviceKey
     this.modelId = modelId
   }
-   
+
   async registerDevice () {
     const endpoint = 'https://dps-proxy.azurewebsites.net/register'
     const url = `${endpoint}?scopeId=${this.scopeId}&deviceId=${this.deviceId}&deviceKey=${encodeURIComponent(this.deviceKey)}&modelId=${this.modelId}`
