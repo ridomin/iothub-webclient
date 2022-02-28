@@ -57,15 +57,15 @@ const createApp = () => {
     methods: {
       async provision () {
         window.localStorage.setItem('connectionInfo',
-            JSON.stringify(
-              {
-                scopeId: this.connectionInfo.scopeId,
-                hubName: this.connectionInfo.hubName,
-                deviceId: this.connectionInfo.deviceId,
-                deviceKey: this.connectionInfo.deviceKey,
-                masterKey: this.connectionInfo.masterKey,
-                modelId: this.connectionInfo.modelId
-              }))
+          JSON.stringify(
+            {
+              scopeId: this.connectionInfo.scopeId,
+              hubName: this.connectionInfo.hubName,
+              deviceId: this.connectionInfo.deviceId,
+              deviceKey: this.connectionInfo.deviceKey,
+              masterKey: this.connectionInfo.masterKey,
+              modelId: this.connectionInfo.modelId
+            }))
         const dpsClient = new AzDpsClient(this.connectionInfo.scopeId, this.connectionInfo.deviceId, this.connectionInfo.deviceKey, this.connectionInfo.modelId)
         this.runningProvision = true
         const result = await dpsClient.registerDevice()
@@ -78,7 +78,7 @@ const createApp = () => {
         }
         this.viewDpsForm = false
       },
-      async refreshDeviceId() {
+      async refreshDeviceId () {
         this.connectionInfo.deviceId = 'device' + Date.now()
         await this.updateDeviceKey()
       },
@@ -183,7 +183,7 @@ const createApp = () => {
       },
       async updateDeviceKey () {
         if (this.viewDpsForm) {
-          if (this.connectionInfo.masterKey.length>0) {
+          if (this.connectionInfo.masterKey.length > 0) {
             this.disableDeviceKey = true
             this.connectionInfo.deviceKey = await createHmac(this.connectionInfo.masterKey, this.connectionInfo.deviceId)
           } else {
