@@ -1,4 +1,5 @@
-import { AzDpsClient, createHmac } from './AzDpsClient.js'
+import { createHmac } from './SasToken.js'
+import { AzDpsClient } from './AzDpsClient.js'
 import { AzIoTHubClient, ackPayload } from './AzIoTHubClient.js'
 
 const createApp = () => {
