@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Azure IoT Hub Web Client</title>
+    <!-- This is a development version of Vue.js! -->
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <script src="lib/paho-mqtt.js"></script>
+    <link rel="stylesheet" href="s.css">
+</head>
+
+<body>
+    <div id="app">
+        <h1>Azure IoT Hub Web Client</h1>
+        <h3>
+            <span v-show="!connectionInfo.connected">Credentials</span>
+            <div v-show="!connectionInfo.connected" >
+                <a v-show="!viewDpsForm" @click="showDpsForm()" href="#">Use DPS/Central</a>
+                <a v-show="viewDpsForm" @click="showDpsForm()" href="#">Use Hub Connection String</a>
+            <div>
+        </h3>
+        <div v-show="!connectionInfo.connected">
+            <p>
+                <label for="inputModelId">Model Id</label>
+                <input type="text" id="inputModelId" size="55" v-model='connectionInfo.modelId'>
+            </p>
+            <p>
+                <label for="inputDeviceId">DeviceId</label>
+                <input type="text" id="inputDeviceId" size="55" 
+                        v-model='connectionInfo.deviceId'
+                        @change='updateDeviceKey()'>
+
+                <a v-show="viewDpsForm" href="#" @click="refreshDeviceId()">refresh</a>
+            </p>
+            <p>
+                <label for="inputDeviceKey">DeviceKey</label>
+                <input type="text" id="inputDeviceKey" size="55" 
+                :disabled='disableDeviceKey'
+                v-model='connectionInfo.deviceKey'>
+            </p>
+        </div>
+        <div v-show="viewDpsForm">
+            <p>
+                <label for="input Id Scope">IdScope</label>
+                <input type="text" id="inputIdScope" size="55" v-model='connectionInfo.scopeId' />
+            </p>
+            <p>
+                <label for="inputMasterKey">MasterKey</label>
+                <input type="text" id="inputMasterKey" size="55" 
+                @change='updateDeviceKey()'
+                v-model='connectionInfo.masterKey'>
+            </p>
+
+            <div class="right" v-show="!runningProvision">
+                <input type="button" id="btnDPS" value="Provision" @click="provision()">
+            </div>
+            <div v-show="runningProvision">
+                <span>Provisioning device ...</span>    
+            </div>
+        </div>
+        <div v-show="!connectionInfo.connected && !viewDpsForm">
+            
+            <p>
+                <label for="inputHostName">Hub Name</label>
+                <input type="text" id="inputHostName" size="55" v-model='connectionInfo.hubName' />
+            </p>
+
+            <div class="right">
+                <label for="chkSaveConfig">Save Config</label>
+                <input type="checkbox" v-model="saveConfig">
+                <label for="btnConnect">{{connectionInfo.status}}</label>
+                <input type="button" id="btnConnect" value="Connect" @click="connect()">
+            </div>
+            <p>
+            <pre>{{ connectionString }}</pre>
+            </p>
+        </div>
+
+        <div v-show="connectionInfo.connected" class="connected">
+            Device <strong>{{ connectionInfo.deviceId }}</strong> connected to IoT Hub
+            <strong>{{ connectionInfo.hubName }}</strong>
+        </div>
+
+        <div v-show="connectionInfo.connected">
+            <table>
+                <tr>
+                    <td>
+                        <div>
+                            <h4>Reported Properties</h4>
+                            <div>
+                                <textarea cols="30" rows="5" v-model="reportedPropJson"></textarea>
+                            </div>
+                            <button @click="reportProp()">Report Prop</button>
+                            <button @click="readTwin()">Refresh Twin</button>
+                            <pre>{{ reportedJson | pretty }}</pre>
+                        </div>
+                    </td>
+                    <td>
+                        <div>
+                            <h4>Desired Properties</h4>
+                            <h5>Updates
+                                <a href="#" @click="clearUpdates()">(clear)</a>
+                            </h5>
+                            <ul v-for="dc in desiredCalls">
+                                <pre>{{ dc | pretty }}</pre>
+                                <button @click="ackDesired(dc, 200)">ACK OK</button>
+                                <button @click="ackDesired(dc, 500)">ACK Fail</button>
+                            </ul>
+                            <pre>{{ desiredJson | pretty }}</pre>
+                        </div>
+                    </td>
+                   
+                    <td>
+                        <div>
+                            <h4>Telemetry</h4>
+                            <div>
+                                <textarea cols="30" rows="3" v-model="telemetryJson"></textarea>
+                            </div>
+                            <button @click="startTelemetry()" v-show="!isTelemetryRunning">Start Telemetry</button>
+                            <button @click="stopTelemetry()" v-show="isTelemetryRunning">Stop Telemetry</button>
+
+                            <span>Messages sent {{ sentMessages }}</span>
+                        </div>
+                    </td>
+                    <td>
+                        <div>
+                            <h4>
+                                Commands <a href="#" @click="clearCommands()">(clear)</a>
+                            </h4>
+                            <ul v-for="c in commands">
+                                <strong>{{ c.method }}</strong> {{ c.rid }}
+                                <pre>{{ c.payload | pretty }}</pre>
+                                <div v-if="c.dirty===false">
+                                    <textarea cols="50" rows="3" v-model="c.response"></textarea>
+                                    <button @click="cmdResponse(c, 200)">Response OK</button>
+                                    <button @click="cmdResponse(c, 500)">Failed</button>
+                                </div>
+                            </ul>
+                        </div>
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+    <script src="index.js" type="module"></script>
+    <div class="footer">
+        <i>
+            Using <a href="https://github.com/eclipse/paho.mqtt.javascript">paho.mqtt.javascript</a> to communicate with
+            Azure IoT hub.
+            <a href="http://github.com/ridomin/iothub-webclient">source 0.0.040</a> by <a href="https://twitter.com/ridomin">ridomin</a>
+
+        </i>
+    </div>
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-66818411-7"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+
+        gtag('config', 'UA-66818411-7');
+    </script>
+</body>
+
+</html>
