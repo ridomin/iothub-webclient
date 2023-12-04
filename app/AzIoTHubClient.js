@@ -124,13 +124,13 @@ export class AzIoTHubClient {
       }
       this.client.connect({
         useSSL: true,
-        userName: userName,
+        userName,
         timeout: 120,
         cleanSession: true,
         invocationContext: {},
         keepAliveInterval: 120,
         willMessage: willMsg,
-        password: password,
+        password,
         onSuccess: () => {
           this.connected = true
           console.log('Connected !!')

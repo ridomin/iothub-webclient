@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
-    "start": "node node_modules/serve/bin/serve.js .",
+    "start": "node node_modules/serve/build/main.js .",
     "build": "rm -r -f app && mkdir app && cp index.* app/ && cp s.css app && cp Az*.js app && cp *.ico app && cp -R lib/ app/"
   },
   "keywords": [
